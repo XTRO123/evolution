@@ -153,10 +153,11 @@ trait Path
 
     /**
      * @return string
+     * @deprecated 
      */
     public function getCacheFolder()
     {
-        return 'cache/';
+        return 'assets/cache/';
     }
 
     /**
@@ -195,7 +196,7 @@ trait Path
      */
     public function getCachePath()
     {
-        return EVO_STORAGE_PATH . $this->getCacheFolder();
+        return EVO_STORAGE_PATH . 'cache/';
     }
 
     /**

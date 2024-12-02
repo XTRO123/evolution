@@ -526,6 +526,11 @@
     color: #a52a2a;
     text-decoration: line-through;
 }
+@media (min-width: 1400px) {
+    #mainMenu #nav > li > a {
+        padding: 0 1.25rem;
+    }
+}
 @media (min-width: 1200px) {
     #searchresult {
         top: 2.5rem;
@@ -590,9 +595,6 @@
     #mainMenu .nav > li .far,
     #mainMenu .nav > li .fas {
         font-size: 0.875rem;
-    }
-    #mainMenu #nav > li > a {
-        padding: 0 1.25rem;
     }
     #mainMenu #nav > li > a > .fa,
     #mainMenu #nav > li > a > .fab,

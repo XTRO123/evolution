@@ -73,6 +73,7 @@ class TemplateProcessor
                         $controller = $namespace . $controller;
                         $controller = new $controller;
                         $controller->setView($templateAlias);
+                        $controller->addViewData($data['documentObject']);
                         $controller->process();
                         $this->core->addDataToView($controller->getViewData());
                         $view = $controller->getView();

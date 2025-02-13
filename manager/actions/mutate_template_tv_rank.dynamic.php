@@ -66,7 +66,7 @@ if ($templateVars->count() > 0) {
         $templatename = $row['templatename'];
         $caption = $row['caption'] != '' ? $row['caption'] : $row['name'];
         $sortableList .= '<li id="item_' . $row['id'] . '"><i class="' . ManagerTheme::getStyle('icon_tv') . '"></i> ' .
-            $caption . ' <small class="protectedNode" style="float:right">[*' . $row['name'] . '*]</small></li>';
+            e($caption) . ' <small class="protectedNode" style="float:right">[*' . $row['name'] . '*]</small></li>';
     }
     $sortableList .= '</ul></div>';
 } else {

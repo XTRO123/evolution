@@ -317,7 +317,7 @@ class MakeTable
     {
         $currentWidth = '';
         if (is_array($this->columnWidths)) {
-            $currentWidth = $this->columnWidths[$columnPosition] ? ' width="' . $this->columnWidths[$columnPosition] . '" ' : '';
+            $currentWidth = !empty($this->columnWidths[$columnPosition]) ? ' width="' . $this->columnWidths[$columnPosition] . '" ' : '';
         }
 
         return $currentWidth;

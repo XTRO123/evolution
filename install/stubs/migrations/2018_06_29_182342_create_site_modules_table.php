@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateSiteModulesTable extends Migration {
+return new class extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -45,4 +45,4 @@ class CreateSiteModulesTable extends Migration {
 		Schema::drop('site_modules');
 	}
 
-}
+};

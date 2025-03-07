@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class DropManagerUserTables extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -72,4 +71,4 @@ class DropManagerUserTables extends Migration
             $table->primary(['webuser','setting_name']);
         });
     }
-}
+};

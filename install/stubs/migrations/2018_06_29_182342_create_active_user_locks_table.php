@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateActiveUserLocksTable extends Migration {
+return new class extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -34,5 +34,4 @@ class CreateActiveUserLocksTable extends Migration {
 	{
 		Schema::drop('active_user_locks');
 	}
-
-}
+};

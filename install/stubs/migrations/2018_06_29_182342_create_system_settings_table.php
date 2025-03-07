@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateSystemSettingsTable extends Migration {
+return new class extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -30,4 +30,4 @@ class CreateSystemSettingsTable extends Migration {
 		Schema::drop('system_settings');
 	}
 
-}
+};

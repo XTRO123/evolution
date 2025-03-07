@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class RemoveColumnFromRoleTable extends Migration {
+return new class extends Migration {
     public $columns = [
         'frames',
         'home',
@@ -110,5 +110,4 @@ class RemoveColumnFromRoleTable extends Migration {
             }
         });
 	}
-
-}
+};

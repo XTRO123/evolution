@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateUserRolesTable extends Migration {
+return new class extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -102,4 +102,4 @@ class CreateUserRolesTable extends Migration {
 		Schema::drop('user_roles');
 	}
 
-}
+};

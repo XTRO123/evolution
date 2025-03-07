@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateSystemEventnamesTable extends Migration {
+return new class extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -32,4 +32,4 @@ class CreateSystemEventnamesTable extends Migration {
 		Schema::drop('system_eventnames');
 	}
 
-}
+};

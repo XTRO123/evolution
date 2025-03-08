@@ -388,11 +388,11 @@ class SiteContent extends Model
 
         return $ids;
     }
-
+    
     /**
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
-    public function getTvAttribute(): Collection
+    public function getTvAttribute(): \Illuminate\Support\Collection
     {
         if ($this->tpl->tvs === null) {
             return collect();

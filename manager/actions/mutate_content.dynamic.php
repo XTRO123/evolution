@@ -616,7 +616,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                         <i class="<?= $_style["icon_question_circle"] ?>" data-tooltip="<?=ManagerTheme::getLexicon('resource_title_help');?>"></i>
                                     </td>
                                     <td>
-                                        <input name="pagetitle" type="text" maxlength="255" value="<?= $modx->getPhpCompat()->htmlspecialchars(stripslashes(get_by_key($content, 'pagetitle', '', 'is_scalar'))) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true" />
+                                        <input name="pagetitle" type="text" maxlength="255" value="<?= e(get_by_key($content, 'pagetitle', '', 'is_scalar')) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true" />
                                         <script>document.getElementsByName("pagetitle")[0].focus();</script>
                                     </td>
                                 </tr>
@@ -626,7 +626,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                         <i class="<?= $_style["icon_question_circle"] ?>" data-tooltip="<?=ManagerTheme::getLexicon('resource_long_title_help');?>"></i>
                                     </td>
                                     <td>
-                                        <input name="longtitle" type="text" maxlength="255" value="<?= $modx->getPhpCompat()->htmlspecialchars(stripslashes(get_by_key($content, 'longtitle', '', 'is_scalar'))) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true" />
+                                        <input name="longtitle" type="text" maxlength="255" value="<?= e(get_by_key($content, 'longtitle', '', 'is_scalar')) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -635,7 +635,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                         <i class="<?= $_style["icon_question_circle"] ?>" data-tooltip="<?=ManagerTheme::getLexicon('resource_description_help');?>"></i>
                                     </td>
                                     <td>
-                                        <input name="description" type="text" maxlength="255" value="<?= $modx->getPhpCompat()->htmlspecialchars(stripslashes(get_by_key($content, 'description', '', 'is_scalar'))) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true" />
+                                        <input name="description" type="text" maxlength="255" value="<?= e(get_by_key($content, 'description', '', 'is_scalar')) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -644,7 +644,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                         <i class="<?= $_style["icon_question_circle"] ?>" data-tooltip="<?=ManagerTheme::getLexicon('resource_alias_help');?>"></i>
                                     </td>
                                     <td>
-                                        <input name="alias" type="text" maxlength="100" value="<?= stripslashes(get_by_key($content, 'alias', '', 'is_scalar')) ?>" class="inputBox" onchange="documentDirty=true;" />
+                                        <input name="alias" type="text" maxlength="100" value="<?= e(get_by_key($content, 'alias', '', 'is_scalar')) ?>" class="inputBox" onchange="documentDirty=true;" />
                                     </td>
                                 </tr>
                                 <tr>
@@ -653,7 +653,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                         <i class="<?= $_style["icon_question_circle"] ?>" data-tooltip="<?=ManagerTheme::getLexicon('link_attributes_help');?>"></i>
                                     </td>
                                     <td>
-                                        <input name="link_attributes" type="text" maxlength="255" value="<?= $modx->getPhpCompat()->htmlspecialchars(stripslashes(get_by_key($content, 'link_attributes', '', 'is_scalar'))) ?>" class="inputBox" onchange="documentDirty=true;" />
+                                        <input name="link_attributes" type="text" maxlength="255" value="<?= e(get_by_key($content, 'link_attributes', '', 'is_scalar')) ?>" class="inputBox" onchange="documentDirty=true;" />
                                     </td>
                                 </tr>
 
@@ -665,7 +665,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                         </td>
                                         <td>
                                             <i id="llock" class="<?= $_style["icon_chain"] ?>" onclick="enableLinkSelection(!allowLinkSelection);"></i>
-                                            <input name="ta" id="ta" type="text" maxlength="255" value="<?= (!empty($content['content']) ? entities(stripslashes($content['content']), $modx->getConfig('modx_charset')) : 'http://') ?>" class="inputBox" onchange="documentDirty=true;" /><input type="button" value="<?=ManagerTheme::getLexicon('insert');?>" onclick="BrowseFileServer('ta')" />
+                                            <input name="ta" id="ta" type="text" maxlength="255" value="<?= (!empty($content['content']) ? entities($content['content'], $modx->getConfig('modx_charset')) : 'http://') ?>" class="inputBox" onchange="documentDirty=true;" /><input type="button" value="<?=ManagerTheme::getLexicon('insert');?>" onclick="BrowseFileServer('ta')" />
                                         </td>
                                     </tr>
 
@@ -677,7 +677,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                         <i class="<?= $_style["icon_question_circle"] ?>" data-tooltip="<?=ManagerTheme::getLexicon('resource_summary_help');?>" spellcheck="true"></i>
                                     </td>
                                     <td valign="top">
-                                        <textarea id="introtext" name="introtext" class="inputBox" rows="3" cols="" onchange="documentDirty=true;"><?= $modx->getPhpCompat()->htmlspecialchars(stripslashes(get_by_key($content, 'introtext', '', 'is_scalar'))) ?></textarea>
+                                        <textarea id="introtext" name="introtext" class="inputBox" rows="3" cols="" onchange="documentDirty=true;"><?=e(get_by_key($content, 'introtext', '', 'is_scalar')) ?></textarea>
                                     </td>
                                 </tr>
                                 <tr>
@@ -736,7 +736,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                         <i class="<?= $_style["icon_question_circle"] ?>" data-tooltip="<?=ManagerTheme::getLexicon('resource_opt_menu_title_help');?>"></i>
                                     </td>
                                     <td>
-                                        <input name="menutitle" type="text" maxlength="255" value="<?= $modx->getPhpCompat()->htmlspecialchars(stripslashes(get_by_key($content, 'menutitle', '', 'is_scalar'))) ?>" class="inputBox" onchange="documentDirty=true;" />
+                                        <input name="menutitle" type="text" maxlength="255" value="<?= e(get_by_key($content, 'menutitle', '', 'is_scalar')) ?>" class="inputBox" onchange="documentDirty=true;" />
                                     </td>
                                 </tr>
                                 <tr>

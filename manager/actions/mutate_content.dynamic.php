@@ -640,7 +640,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                 <td>
                                     <input name="pagetitle" type="text" maxlength="255"
                                            value="<?= e(
-                                               stripslashes(get_by_key($content, 'pagetitle', '', 'is_scalar'))
+                                               get_by_key($content, 'pagetitle', '', 'is_scalar')
                                            ) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true"/>
                                     <script>document.getElementsByName('pagetitle')[0].focus()</script>
                                 </td>
@@ -654,7 +654,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                 <td>
                                     <input name="longtitle" type="text" maxlength="255"
                                            value="<?= e(
-                                               stripslashes(get_by_key($content, 'longtitle', '', 'is_scalar'))
+                                               get_by_key($content, 'longtitle', '', 'is_scalar')
                                            ) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true"/>
                                 </td>
                             </tr>
@@ -667,7 +667,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                 <td>
                                     <input name="description" type="text" maxlength="255"
                                            value="<?= e(
-                                               stripslashes(get_by_key($content, 'description', '', 'is_scalar'))
+                                               get_by_key($content, 'description', '', 'is_scalar')
                                            ) ?>" class="inputBox" onchange="documentDirty=true;" spellcheck="true"/>
                                 </td>
                             </tr>
@@ -679,7 +679,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                 </td>
                                 <td>
                                     <input name="alias" type="text" maxlength="100"
-                                           value="<?= stripslashes(get_by_key($content, 'alias', '', 'is_scalar')) ?>"
+                                           value="<?= e(get_by_key($content, 'alias', '', 'is_scalar')) ?>"
                                            class="inputBox" onchange="documentDirty=true;"/>
                                 </td>
                             </tr>
@@ -692,9 +692,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                 <td>
                                     <input name="link_attributes" type="text" maxlength="255"
                                            value="<?= e(
-                                               stripslashes(
                                                    get_by_key($content, 'link_attributes', '', 'is_scalar')
-                                               )
                                            ) ?>" class="inputBox" onchange="documentDirty=true;"/>
                                 </td>
                             </tr>
@@ -714,7 +712,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                            onclick="enableLinkSelection(!allowLinkSelection);"></i>
                                         <input name="ta" id="ta" type="text" maxlength="255"
                                                value="<?= (!empty($content['content']) ? e(
-                                                   stripslashes($content['content'])
+                                                   $content['content']
                                                ) : 'http://') ?>" class="inputBox"
                                                onchange="documentDirty=true;"/>
                                         <input type="button"
@@ -736,7 +734,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                 <td valign="top">
                                         <textarea id="introtext" name="introtext" class="inputBox" rows="3" cols=""
                                                   onchange="documentDirty=true;"><?= e(
-                                                    stripslashes(get_by_key($content, 'introtext', '', 'is_scalar'))
+                                                    get_by_key($content, 'introtext', '', 'is_scalar')
                                                 ) ?></textarea>
                                 </td>
                             </tr>
@@ -808,7 +806,7 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
                                 <td>
                                     <input name="menutitle" type="text" maxlength="255"
                                            value="<?= e(
-                                               stripslashes(get_by_key($content, 'menutitle', '', 'is_scalar'))
+                                               get_by_key($content, 'menutitle', '', 'is_scalar')
                                            ) ?>" class="inputBox" onchange="documentDirty=true;"/>
                                 </td>
                             </tr>

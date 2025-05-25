@@ -43,6 +43,7 @@
         )) !!};
         evo.MODX_MANAGER_URL = '{{  MODX_MANAGER_URL }}';
         evo.config.which_browser = '{{ $modx->getConfig('which_browser') }}';
+        evo.locale = '{{ $modx->getLocale() }}';
     </script>
     <script src="media/script/main.js"></script>
 

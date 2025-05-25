@@ -48,6 +48,7 @@ use Tracy\Debugger;
         )) !!};
       evo.MODX_MANAGER_URL = '{{  MODX_MANAGER_URL }}'
       evo.config.which_browser = '{{ config('global.which_browser') }}'
+      evo.locale = '{{ evo()->getLocale() }}';
     </script>
     <script src="media/script/main.js"></script>
 

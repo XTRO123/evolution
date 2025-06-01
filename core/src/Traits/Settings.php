@@ -67,7 +67,6 @@ trait Settings
         'search_default' => 'bool',
         'cache_default' => 'bool',
         'auto_menuindex' => 'bool',
-        'track_visitors' => 'bool',
     ];
 
     /**

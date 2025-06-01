@@ -492,22 +492,6 @@
 
         <div class="split my-1"></div>
 
-        @include('manager::form.radio', [
-            'name' => 'track_visitors',
-            'label' => __('global.track_visitors_title'),
-            'small' => '[(track_visitors)]',
-            'value' => $settings['track_visitors'],
-            'options' => [
-                1 => __('global.yes'),
-                0 => __('global.no')
-            ],
-            'comment' => (isset($disabledSettings['track_visitors']) ? __('global.setting_from_file') . '<br>' : '') .
-                __('global.track_visitors_message'),
-            'disabled' => $disabledSettings['track_visitors'] ?? null
-        ])
-
-        <div class="split my-1"></div>
-
         {!! get_by_key($tabEvents, 'OnSiteSettingsRender') !!}
     </div>
 </div>

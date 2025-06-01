@@ -83,7 +83,6 @@ class SystemEventnamesTableSeeder extends Seeder
             ['name' => 'OnLoadWebDocument', 'service' => '5', 'groupname' => '',],
             ['name' => 'OnLoadWebPageCache', 'service' => '4', 'groupname' => '',],
             ['name' => 'OnLogEvent', 'service' => '1', 'groupname' => 'Log Event',],
-            ['name' => 'OnLogPageHit', 'service' => '5', 'groupname' => '',],
             ['name' => 'OnMakeDocUrl', 'service' => '5', 'groupname' => '',],
             ['name' => 'OnMakePageCacheKey', 'service' => '4', 'groupname' => '',],
             ['name' => 'OnManagerFrameLoader', 'service' => '2', 'groupname' => '',],

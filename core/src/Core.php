@@ -318,7 +318,7 @@ class Core extends AbstractLaravel implements Interfaces\CoreInterface
         if (empty($context)) {
             $context = $this->getContext();
         }
-        if (evo()->getLoginUserID($context) !== false) {
+        if (!empty(evo()->getLoginUserID($context))) {
             $result = $this->checkAccess(evo()->getLoginUserID($context));
             if ($result === false) {
                 \UserManager::logout();
@@ -4891,7 +4891,7 @@ class Core extends AbstractLaravel implements Interfaces\CoreInterface
             $tmplvar['id'] = $tmplvar['tmplvarid'];
             $tmplvar['contentid'] = $docid;
         }
-        
+
         // get default/built-in template variables
         if (is_array($docRow)) {
             ksort($docRow);
@@ -5047,13 +5047,20 @@ class Core extends AbstractLaravel implements Interfaces\CoreInterface
      */
     public function getLoginUserID($context = '')
     {
+        $out = false;
+
         if (is_cli() && defined('EVO_CLI_USER')) {
             return EVO_CLI_USER;
         }
-        $out = false;
+
+        if (is_cli()) {
+            return false;
+        }
+
         if (empty($context)) {
             $context = $this->getContext();
         }
+
         if (isset($_SESSION[$context . 'Validated'])) {
             $out = $_SESSION[$context . 'InternalKey'];
         }

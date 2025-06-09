@@ -9,6 +9,7 @@ define('MODX_SITE_URL', '/');
 define('EVO_CORE_PATH', $base_path . 'core/');
 define('IN_INSTALL_MODE', true);
 define('MODX_CLI', true);
+define('EVO_CLI_USER', 0);
 require_once 'src/functions.php';
 /**
  * EVO Cli Installer
@@ -80,15 +81,15 @@ class InstallEvo
     public function initEvo()
     {
 
-        include '../index.php';
+        include __DIR__ . '/../index.php';
         $this->evo = EvolutionCMS();
     }
 
     public function update()
     {
         $this->initEvo();
-        Console::call('migrate', ['--path' => '../install/stubs/migrations', '--force' => true]);
-        seed('update');
+        $this->runMigrations();
+        $this->runSeeds("update");
         echo 'Evolution CMS updated!' . "\n";
         $this->checkRemoveInstall();
         $this->removeInstall();
@@ -319,7 +320,10 @@ class InstallEvo
     {
         $this->writeConfig();
         $this->initEvo();
-        $this->migrationAndSeed();
+        $this->runMigrations();
+        $this->runSeeds();
+        $this->createAdminUser();
+        $this->setSystemSettings();
         $this->installModulesAndPlugins();
         $this->clearCacheAfterInstall();
     }
@@ -353,7 +357,7 @@ class InstallEvo
                 }
                 break;
         }
-        $configString = file_get_contents('stubs/files/config/database/connections/default.tpl');
+        $configString = file_get_contents(__DIR__ . '/stubs/files/config/database/connections/default.tpl');
         $configString = parse($configString, $confph);
 
         $filename = EVO_CORE_PATH . 'config/database/connections/default.php';
@@ -375,10 +379,13 @@ class InstallEvo
 
     }
 
-    public function migrationAndSeed()
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function runMigrations()
     {
-
-        $delete_file = 'stubs/file_for_delete.txt';
+        $delete_file = __DIR__ . '/stubs/file_for_delete.txt';
         if (file_exists($delete_file)) {
             $files = explode("\n", file_get_contents($delete_file));
             foreach ($files as $file) {
@@ -393,24 +400,162 @@ class InstallEvo
             }
         }
         $_POST['database_type'] = $this->databaseType; //костыль для адекватной миграции
-        Console::call('migrate', ['--path' => '../install/stubs/migrations', '--force' => true]);
-        seed('install');
-        $field = array();
-        $field['password'] = $this->evo->getPasswordHash()->HashPassword($this->cmsPassword);
-        $field['username'] = $this->cmsAdmin;
-        $managerUser = EvolutionCMS\Models\User::create($field);
-        $internalKey = $managerUser->getKey();
-        $role = \EvolutionCMS\Models\UserRole::where('name', 'Administrator')->first()->getKey();
-        $field = ['internalKey' => $internalKey, 'email' => $this->cmsAdminEmail, 'role' => $role, 'verified' => 1];
-        $managerUser->attributes()->create($field);
-        $managerUser->attributes->role = $role;
-        $managerUser->attributes->save();
-        $systemSettings[] = ['setting_name' => 'manager_language', 'setting_value' => $this->language];
-        $systemSettings[] = ['setting_name' => 'auto_template_logic', 'setting_value' => 1];
-        $systemSettings[] = ['setting_name' => 'emailsender', 'setting_value' => $this->cmsAdminEmail];
-        $systemSettings[] = ['setting_name' => 'fe_editor_lang', 'setting_value' => $this->language];
-        \EvolutionCMS\Models\SystemSetting::insert($systemSettings);
 
+        if (!class_exists('DB')) {
+            class_alias('\Illuminate\Support\Facades\DB', 'DB');
+        }
+
+        echo "Running migrations manually...\n";
+        try {
+            $migrationsPath = __DIR__ . '/stubs/migrations';
+            $migrationFiles = glob($migrationsPath . '/*.php');
+            sort($migrationFiles);
+
+            foreach ($migrationFiles as $file) {
+                $fileName = basename($file);
+                echo "Running migration: {$fileName}\n";
+
+                $content = file_get_contents($file);
+                if (preg_match('/class\s+(\w+)\s+extends/', $content, $matches)) {
+                    $className = $matches[1];
+
+                    try {
+                        require_once $file;
+
+                        if (class_exists($className)) {
+                            $migration = new $className();
+                            if (method_exists($migration, 'up')) {
+                                $migration->up();
+                                echo "Migration {$className} completed successfully\n";
+                            }
+                        } else {
+                            echo "Class {$className} not found in {$fileName}\n";
+                        }
+                    } catch (Exception $e) {
+                        echo "Migration {$className} failed: " . $e->getMessage() . "\n";
+                        continue;
+                    }
+                } else {
+                    echo "Could not extract class name from {$fileName}\n";
+                }
+            }
+
+            echo "All migrations completed\n";
+        } catch (Exception $e) {
+            echo "Migration error: " . $e->getMessage() . "\n";
+            echo "File: " . $e->getFile() . " Line: " . $e->getLine() . "\n";
+            throw $e;
+        } catch (Error $e) {
+            echo "PHP Error during migration: " . $e->getMessage() . "\n";
+            echo "File: " . $e->getFile() . " Line: " . $e->getLine() . "\n";
+            throw $e;
+        }
+    }
+
+    /**
+     * @param  string  $mode
+     * @return void
+     * @throws Exception
+     */
+    protected function runSeeds(string $mode = "install")
+    {
+        echo "Running seeds...\n";
+        try {
+            $seedsPath = __DIR__ . "/stubs/seeds/{$mode}";
+            $seederFiles = glob($seedsPath . '/*.php');
+            sort($seederFiles);
+
+            foreach ($seederFiles as $file) {
+                $fileName = basename($file);
+                echo "Running seeder: {$fileName}\n";
+
+                $content = file_get_contents($file);
+                if (preg_match('/class\s+(\w+)\s+extends/', $content, $matches)) {
+                    $className = $matches[1];
+                    $fullClassName = 'EvolutionCMS\\Installer\\Install\\' . $className;
+
+                    try {
+                        require_once $file;
+
+                        if (class_exists($fullClassName)) {
+                            $seeder = new $fullClassName();
+                            if (method_exists($seeder, 'run')) {
+                                $seeder->run();
+                                echo "Seeder {$className} completed successfully\n";
+                            }
+                        } else {
+                            echo "Class {$fullClassName} not found in {$fileName}\n";
+                        }
+                    } catch (Exception $e) {
+                        echo "Seeder {$className} failed: " . $e->getMessage() . "\n";
+                        continue;
+                    }
+                } else {
+                    echo "Could not extract class name from {$fileName}\n";
+                }
+            }
+
+            echo "Seeds completed successfully\n";
+        } catch (Exception $e) {
+            echo "Seed error: " . $e->getMessage() . "\n";
+            echo "File: " . $e->getFile() . " Line: " . $e->getLine() . "\n";
+            throw $e;
+        }
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    protected function createAdminUser()
+    {
+        echo "Creating admin user...\n";
+        try {
+            $field = array();
+            $field['password'] = $this->evo->getPasswordHash()->HashPassword($this->cmsPassword);
+            $field['username'] = $this->cmsAdmin;
+            $managerUser = EvolutionCMS\Models\User::create($field);
+            $internalKey = $managerUser->getKey();
+
+            $role = \EvolutionCMS\Models\UserRole::where('name', 'Administrator')->first();
+
+            if (!empty($role)) {
+                $role = $role->getKey();
+            } else {
+                $role = \EvolutionCMS\Models\UserRole::create(['name' => 'Administrator', 'description' => 'Administrator role'])->getKey();
+            }
+
+            $field = ['internalKey' => $internalKey, 'email' => $this->cmsAdminEmail, 'role' => $role, 'verified' => 1];
+            $managerUser->attributes()->create($field);
+            $managerUser->attributes->role = $role;
+            $managerUser->attributes->save();
+            echo "Admin user created successfully\n";
+        } catch (Exception $e) {
+            echo "Admin user creation error: " . $e->getMessage() . "\n";
+            echo "File: " . $e->getFile() . " Line: " . $e->getLine() . "\n";
+            throw $e;
+        }
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    protected function setSystemSettings()
+    {
+        echo "Setting system settings...\n";
+        try {
+            $systemSettings[] = ['setting_name' => 'manager_language', 'setting_value' => $this->language];
+            $systemSettings[] = ['setting_name' => 'auto_template_logic', 'setting_value' => 1];
+            $systemSettings[] = ['setting_name' => 'emailsender', 'setting_value' => $this->cmsAdminEmail];
+            $systemSettings[] = ['setting_name' => 'fe_editor_lang', 'setting_value' => $this->language];
+            \EvolutionCMS\Models\SystemSetting::insert($systemSettings);
+            echo "System settings configured successfully\n";
+        } catch (Exception $e) {
+            echo "System settings error: " . $e->getMessage() . "\n";
+            echo "File: " . $e->getFile() . " Line: " . $e->getLine() . "\n";
+            throw $e;
+        }
     }
 
     public function installModulesAndPlugins()

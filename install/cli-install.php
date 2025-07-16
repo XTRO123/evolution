@@ -416,6 +416,7 @@ class InstallEvo
                 echo "Running migration: {$fileName}\n";
 
                 $content = file_get_contents($file);
+                
                 if (preg_match('/class\s+(\w+)\s+extends/', $content, $matches)) {
                     $className = $matches[1];
 
@@ -433,10 +434,21 @@ class InstallEvo
                         }
                     } catch (Exception $e) {
                         echo "Migration {$className} failed: " . $e->getMessage() . "\n";
-                        continue;
+                    }
+                } elseif (preg_match('/return\s+new\s+class/', $content)) {
+                    try {
+                        $migration = include $file;
+                        if (is_object($migration) && method_exists($migration, 'up')) {
+                            $migration->up();
+                            echo "Anonymous migration in {$fileName} completed successfully\n";
+                        } else {
+                            echo "Invalid anonymous migration in {$fileName}\n";
+                        }
+                    } catch (Exception $e) {
+                        echo "Anonymous migration in {$fileName} failed: " . $e->getMessage() . "\n";
                     }
                 } else {
-                    echo "Could not extract class name from {$fileName}\n";
+                    echo "No valid migration class found in {$fileName}\n";
                 }
             }
 

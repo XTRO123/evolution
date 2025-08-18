@@ -416,7 +416,7 @@ class InstallEvo
                 echo "Running migration: {$fileName}\n";
 
                 $content = file_get_contents($file);
-                
+
                 if (preg_match('/class\s+(\w+)\s+extends/', $content, $matches)) {
                     $className = $matches[1];
 
@@ -572,8 +572,8 @@ class InstallEvo
 
     public function installModulesAndPlugins()
     {
-        $pluginPath = 'assets/plugins';
-        $modulePath = 'assets/modules';
+        $pluginPath = __DIR__.'/assets/plugins';
+        $modulePath = __DIR__.'/assets/modules';
         $modulePlugins = [];
         // setup plugins template files - array : name, description, type - 0:file or 1:content, file or content,properties
         $mp = &$modulePlugins;

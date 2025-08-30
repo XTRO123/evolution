@@ -35,18 +35,6 @@ browser.init = function() {
 };
 
 browser.checkAgent = function() {
-    if (!$.browser.version ||
-        ($.browser.msie && (parseInt($.browser.version) < 7) && !this.support.chromeFrame) ||
-        ($.browser.opera && (parseInt($.browser.version) < 10)) ||
-        ($.browser.mozilla && (parseFloat($.browser.version.replace(/^(\d+(\.\d+)?)([^\d].*)?$/, "$1")) < 1.8))
-    ) {
-        var html = '<div style="padding:10px">Your browser is not capable to display KCFinder. Please update your browser or install another one: <a href="http://www.mozilla.com/firefox/" target="_blank">Mozilla Firefox</a>, <a href="http://www.apple.com/safari" target="_blank">Apple Safari</a>, <a href="http://www.google.com/chrome" target="_blank">Google Chrome</a>, <a href="http://www.opera.com/browser" target="_blank">Opera</a>.';
-        if ($.browser.msie)
-            html += ' You may also install <a href="http://www.google.com/chromeframe" target="_blank">Google Chrome Frame ActiveX plugin</a> to get Internet Explorer 6 working.';
-        html += '</div>';
-        $('body').html(html);
-        return false;
-    }
     return true;
 };
 
@@ -127,7 +115,7 @@ browser.initContent = function() {
 };
 
 browser.initResizer = function() {
-    var cursor = ($.browser.opera) ? 'move' : 'col-resize';
+    var cursor = 'col-resize';
     $('#resizer').css('cursor', cursor);
     $('#resizer').drag('start', function() {
         $(this).css({opacity:'0.4', filter:'alpha(opacity:40)'});
@@ -173,8 +161,6 @@ browser.resize = function() {
         _('status').style.width = _.nopx(_('status').style.width) - 1 + 'px';
     while ($('#status').outerWidth() < width)
         _('status').style.width = _.nopx(_('status').style.width) + 1 + 'px';
-    if ($.browser.msie && ($.browser.version.substr(0, 1) < 8))
-        _('right').style.width = $(window).width() - $('#left').outerWidth() + 'px';
     _('files').style.width = $('#right').innerWidth() - _.outerHSpace('#files') + 'px';
     _('resizer').style.left = $('#left').outerWidth() - _.outerRightSpace('#folders', 'm') + 'px';
     _('resizer').style.width = _.outerRightSpace('#folders', 'm') + _.outerLeftSpace('#files', 'm') + 'px';

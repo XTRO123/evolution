@@ -32,23 +32,6 @@ browser.initFolders = function() {
         _.unselect();
         browser.menuDir($(this).parent(), e);
     });
-
-    if ($.browser.msie && $.browser.version &&
-        (parseInt($.browser.version.substr(0, 1)) < 8)
-    ) {
-        var fls = $('div.folder').get();
-        var body = $('body').get(0);
-        var div;
-        $.each(fls, function(i, folder) {
-            div = document.createElement('div');
-            div.style.display = 'inline';
-            div.style.margin = div.style.border = div.style.padding = '0';
-            div.innerHTML='<table style="border-collapse:collapse;border:0;margin:0;width:0"><tr><td nowrap="nowrap" style="white-space:nowrap;padding:0;border:0">' + $(folder).html() + "</td></tr></table>";
-            body.appendChild(div);
-            $(folder).css('width', $(div).innerWidth() + 'px');
-            body.removeChild(div);
-        });
-    }
 };
 
 browser.setTreeData = function(data, path) {

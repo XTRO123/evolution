@@ -194,17 +194,11 @@ class SiteContent extends Eloquent\Model
             $entity->editedby = evolutionCMS()->getLoginUserID();
         });
 
-        static::saving(static function (SiteContent $entity) {
-            if ($entity->isDirty($entity->getPositionColumn())) {
-                $latest = static::getLatestPosition($entity);
-                $entity->menuindex = max(0, min($entity->menuindex, $latest));
-            } elseif (!$entity->exists) {
-                $entity->menuindex = static::getLatestPosition($entity);
-            }
-        });
-
         static::creating(static function (SiteContent $entity) {
             $entity->createdby = evolutionCMS()->getLoginUserID();
+            if(!$entity->isDirty('menuindex')) {
+                $entity->menuindex = static::getLatestPosition($entity);
+            }
         });
         // When entity is created, the appropriate
         // data will be put into the closure table.
@@ -1955,12 +1949,9 @@ class SiteContent extends Eloquent\Model
         $positionColumn = $entity->getPositionColumn();
         $parentIdColumn = $entity->getParentIdColumn();
 
-        $latest = $entity->select($positionColumn)
+        $position = (int)$entity
             ->where($parentIdColumn, '=', $entity->parent)
-            ->latest($positionColumn)
-            ->first();
-
-        $position = $latest !== null ? $latest->menuindex : -1;
+            ->count();
 
         return $position + 1;
     }

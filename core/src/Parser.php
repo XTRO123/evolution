@@ -213,7 +213,7 @@ class Parser
                 $this->setTemplateExtension('blade.php');
             }
             switch ($mode) {
-                case '@VIEW:':
+                case '@VIEW':
                     $tpl = $subTmp;
                     break;
                 case '@B_FILE':
@@ -409,6 +409,8 @@ class Parser
     {
         $out = $this->getChunk($name);
         if(strpos($name, '@VIEW:') === 0) {
+            $data['data'] = $data;
+
             return view($out, $data);
         }
         $blade = strpos($name, '@B_') === 0 && $this->bladeEnabled;

@@ -527,7 +527,7 @@ class UrlProcessor
                     JOIN " . $this->core->getDatabase()->getFullTableName('site_content') . " AS `children` ON `children`.`parent` = `sc`.`id`
                     LEFT JOIN " . $this->core->getDatabase()->getFullTableName('site_content') . " AS `grandsons` ON `grandsons`.`parent` = `children`.`id`
                     WHERE `sc`.`parent` = " . $parentid . " AND `sc`.`alias_visible` = '0'
-                    GROUP BY `children`.`id`"
+                    GROUP BY `sc`.`id`, `children`.`alias`, `children`.`id`"
             );
             while ($child = $this->core->getDatabase()->getRow($query)) {
                 if ($child['child_alias'] == $alias || $child['child_id'] == $alias) {

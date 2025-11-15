@@ -112,7 +112,7 @@ if ($role != 1 && $wdgVisibility == 'AdminOnly') {
             }
             $output = '<div class="card-body">' . $_lang['cms_outdated_msg'] . ' <strong>' . $updateData['version'] . '</strong> <br><br>
                 ' . $updateButton . '
-                <small style="color:red;font-size:10px"> ' . $_lang['bkp_before_msg'] . '</small>';
+                <small style="color:red;font-size:10px"> ' . $_lang['bkp_before_msg'] . '</small></div>';
 
             $widgets['updater'] = array(
                 'menuindex' => '1',

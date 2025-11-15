@@ -434,22 +434,6 @@
 
         <div class="split my-1"></div>
 
-        @include('manager::form.radio', [
-            'name' => 'minifyphp_incache',
-            'label' => __('global.minifyphp_incache_title'),
-            'small' => '[(minifyphp_incache)]',
-            'value' => $settings['minifyphp_incache'],
-            'options' => [
-                1 => __('global.enabled'),
-                0 => __('global.disabled')
-            ],
-            'comment' => (isset($disabledSettings['minifyphp_incache']) ? __('global.setting_from_file') . '<br>' : '') .
-                __('global.minifyphp_incache_message'),
-            'disabled' => $disabledSettings['minifyphp_incache'] ?? null
-        ])
-
-        <div class="split my-1"></div>
-
         @include('manager::form.select', [
             'name' => 'server_offset_time',
             'label' => __('global.serveroffset_title'),
@@ -460,34 +444,6 @@
             'comment' => (isset($disabledSettings['server_offset_time']) ? __('global.setting_from_file') . '<br>' : '') .
                 sprintf(__('global.serveroffset_message'), evolutionCMS()->toDateFormat(time(), 'timeOnly'), evolutionCMS()->toDateFormat(time() + $settings['server_offset_time'], 'timeOnly')),
             'disabled' => $disabledSettings['server_offset_time'] ?? null
-        ])
-
-        <div class="split my-1"></div>
-
-        @include('manager::form.radio', [
-            'name' => 'server_protocol',
-            'label' => __('global.server_protocol_title'),
-            'small' => '[(server_protocol)]',
-            'value' => $settings['server_protocol'],
-            'options' => [
-                'http' => __('global.server_protocol_http'),
-                'https' => __('global.server_protocol_https')
-            ],
-            'comment' => (isset($disabledSettings['server_protocol']) ? __('global.setting_from_file') . '<br>' : '') .
-                __('global.server_protocol_message'),
-            'disabled' => $disabledSettings['server_protocol'] ?? null
-        ])
-
-        <div class="split my-1"></div>
-
-        @include('manager::form.input', [
-            'name' => 'rss_url_news',
-            'label' => __('global.rss_url_news_title'),
-            'small' => '[(rss_url_news)]',
-            'value' => $settings['rss_url_news'],
-            'attributes' => 'onchange="documentDirty=true;" maxlength="350"',
-            'comment' => (isset($disabledSettings['rss_url_news']) ? __('global.setting_from_file') . '<br>' : ''),
-            'disabled' => $disabledSettings['rss_url_news'] ?? null
         ])
 
         <div class="split my-1"></div>

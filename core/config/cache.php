@@ -48,10 +48,6 @@ return [
             'driver' => 'file',
             'path' => EVO_STORAGE_PATH . 'cache/',
         ],
-        'rss' => [
-            'driver' => 'file',
-            'path' => EVO_STORAGE_PATH . 'rss/',
-        ],
         'updater' => [
             'driver' => 'file',
             'path' => EVO_STORAGE_PATH . 'updater/',

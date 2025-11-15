@@ -57,26 +57,6 @@
 			</div>
 		</div>
 
-		<!-- modx news -->
-		<div class="tab-page" id="tabNews" style="padding-left:0; padding-right:0">
-			<h2 class="tab">[%modx_news_tab%]</h2>
-			<script type="text/javascript">tpPane.addTabPage(document.getElementById("tabNews"));</script>
-			<div class="sectionHeader">[%modx_news_title%]</div>
-			<div class="sectionBody">
-				[+modx_news_content+]
-			</div>
-		</div>
-
-		<!-- security notices -->
-		<div class="tab-page" id="tabSecurityNotices" style="padding-left:0; padding-right:0">
-			<h2 class="tab">[%security_notices_tab%]</h2>
-			<script type="text/javascript">tpPane.addTabPage(document.getElementById("tabSecurityNotices"));</script>
-			<div class="sectionHeader">[%security_notices_title%]</div>
-			<div class="sectionBody">
-				[+modx_security_notices_content+]
-			</div>
-		</div>
-
 		<!-- recent activities -->
 		<div class="tab-page" id="tabAct" style="padding-left:0; padding-right:0">
 			<h2 class="tab">[%recent_docs%]</h2>

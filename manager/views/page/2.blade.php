@@ -204,55 +204,6 @@
     }
     $ph['OnlineInfo'] = $html;
 
-    // include rss feeds for important forum topics
-    // Here you can set the urls to retrieve the RSS from. Simply add a $urls line following the numbering progress in the square brakets.
-
-    $urls['modx_news_content'] = $modx->getConfig('rss_url_news');
-    $urls['modx_security_notices_content'] = $modx->getConfig('rss_url_security');
-
-    // How many items per Feed?
-    $itemsNumber = 3;
-
-
-    $feedData = cache()->store('rss')->remember('feeddata', 24 * 3600, function() use ($modx, $urls, $itemsNumber) {
-        // create Feed
-        $feedData = [];
-        $feed = new \SimplePie\SimplePie();
-        foreach ($urls as $section => $url) {
-            if (empty($url)) {
-                continue;
-            }
-            $output = '';
-            $feed->set_feed_url($url);
-            $feed->enable_cache(false);
-            $feed->init();
-            $items = $feed->get_items(0, $itemsNumber);
-            if (empty($items)) {
-                $feedData[$section] = 'Failed to retrieve ' . $url;
-                continue;
-            }
-            $output = '<ul>';
-            foreach ($items as $item) {
-                $href = $item->get_link();
-                $title = $item->get_title();
-                $pubdate = $item->get_date();
-                $pubdate = $modx->toDateFormat(strtotime($pubdate));
-                $description = strip_tags($item->get_content());
-                if (strlen($description) > 199) {
-                    $description = \Illuminate\Support\Str::words($description, 15, '...');
-                    $description .= '<br />Read <a href="' . $href . '" target="_blank">more</a>.';
-                }
-                $output .= '<li><a href="' . $href . '" target="_blank">' . $title . '</a> - <b>' . $pubdate . '</b><br />' . $description . '</li>';
-            }
-            $output .= '</ul>';
-            $feedData[$section] = $output;
-        }
-
-        return $feedData;
-    });
-
-    $ph['modx_security_notices_content'] = $feedData['modx_security_notices_content'] ?? [];
-    $ph['modx_news_content'] = $feedData['modx_news_content'] ?? [];
     $ph['theme'] = $modx->getConfig('manager_theme');
     $ph['site_name'] = $modx->getPhpCompat()->entities($modx->getConfig('site_name'));
     $ph['home'] = $_lang['home'];
@@ -267,11 +218,6 @@
     $ph['activity_title'] = $_lang['activity_title'];
     $ph['info'] = $_lang['info'];
     $ph['yourinfo_title'] = $_lang['yourinfo_title'];
-
-    $ph['modx_security_notices'] = $_lang['security_notices_tab'];
-    $ph['modx_security_notices_title'] = $_lang['security_notices_title'];
-    $ph['modx_news'] = $_lang['modx_news_tab'];
-    $ph['modx_news_title'] = $_lang['modx_news_title'];
 
     $modx->toPlaceholders($ph);
 
@@ -410,28 +356,6 @@
         'body' => '<div class="widget-stage">[+RecentInfo+]</div>',
         'hide' => '0',
     ];
-    if ($modx->getConfig('rss_url_news')) {
-        $widgets['news'] = [
-            'menuindex' => '40',
-            'id' => 'news',
-            'cols' => 'col-sm-6',
-            'icon' => 'fa-rss',
-            'title' => '[%modx_news_title%]',
-            'body' => '<div style="max-height:200px;overflow-y: scroll;padding: 1rem .5rem">[+modx_news_content+]</div>',
-            'hide' => '0',
-        ];
-    }
-    if ($modx->getConfig('rss_url_security')) {
-        $widgets['security'] = [
-            'menuindex' => '50',
-            'id' => 'security',
-            'cols' => 'col-sm-6',
-            'icon' => 'fa-exclamation-triangle',
-            'title' => '[%security_notices_title%]',
-            'body' => '<div style="max-height:200px;overflow-y: scroll;padding: 1rem .5rem">[+modx_security_notices_content+]</div>',
-            'hide' => '0',
-        ];
-    }
 
     // invoke OnManagerWelcomeHome event
     $sitewidgets = $modx->invokeEvent('OnManagerWelcomeHome', ['widgets' => $widgets]);

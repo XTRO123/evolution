@@ -62,7 +62,6 @@
     "evocms-services/user-manager": "1.*",
     "evocms-services/document-manager": "1.*",
     "evolution-cms/salo": "1.*",
-    "simplepie/simplepie": "1.*",
     "pathologic/modxapi": "1.*"
   },
   "require-dev": {

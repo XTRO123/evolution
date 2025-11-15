@@ -10,9 +10,6 @@ return [
     'valid_hostnames' => '',
     'enable_filter' => 0,
     'enable_at_syntax' => 0,
-    'minifyphp_incache' => 0,
-    'rss_url_news' => ManagerTheme::getLexicon("rss_url_news_default"),
-    'rss_url_security' => ManagerTheme::getLexicon("rss_url_security_default"),
     'friendly_urls' => 0,
     'friendly_url_prefix' => '',
     'friendly_url_suffix' => '.html',
@@ -94,7 +91,6 @@ return [
     'datetime_format' => 'dd-mm-YYYY',
     'enable_cache' => '1',
     'cache_type' => '1',
-    'server_protocol' => 'http',
     'settings_version' => 0,
     'server_offset_time' => 0,
     'default_template' => 0,
@@ -118,7 +114,6 @@ return [
     'allow_multiple_emails' => 0,
     'manager_menu_height' => 2.2, // rem
     'manager_tree_width' => 20, // rem
-    'track_visitors' => 0,
     'login_logo' => '',
     'login_bg' => '',
     'smtp_secure' => '',

@@ -39,6 +39,11 @@ class SystemSettingsTableSeeder extends Seeder
             $deleteArray = [
                 'aliaslistingfolder',
                 'full_aliaslisting',
+                'track_visitors',
+                'minifyphp_incache',
+                'server_protocol',
+                'rss_url_news',
+                'rss_url_security',
             ];
             foreach ($deleteArray as $value) {
                 \DB::table('system_settings')->where('setting_name', $value)->delete();

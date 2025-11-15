@@ -128,6 +128,7 @@ trait Settings
         $this->setConfig('base_path', MODX_BASE_PATH);
         $this->setConfig('site_url', MODX_SITE_URL);
         $this->setConfig('site_manager_path', MODX_MANAGER_PATH);
+        $this->setConfig('server_protocol', stripos(MODX_SITE_URL, 'https') === 0 ? 'https' : 'http');
         $this->error_reporting = $this->getConfig('error_reporting');
         $this->setConfig(
             'filemanager_path',

@@ -318,9 +318,6 @@ class Cache
                     $content .= '$s[\'' . $row['name'] . '\']=\'return false;\';';
                 } else {
                     $value = trim($row['snippet']);
-                    if ($modx->getConfig('minifyphp_incache')) {
-                        $value = $this->php_strip_whitespace($value);
-                    }
                     $content .= '$s[\'' . $row['name'] . '\']=\'' . $this->escapeSingleQuotes($value) . '\';';
                     $properties = $modx->parseProperties($row['properties']);
                     $sharedproperties = $modx->parseProperties($row['sharedproperties']);
@@ -342,9 +339,6 @@ class Cache
             $content .= '$p=&$this->pluginCache;';
             foreach ($plugins->toArray() as $row) {
                 $value = trim($row['plugincode']);
-                if ($modx->getConfig('minifyphp_incache')) {
-                    $value = $this->php_strip_whitespace($value);
-                }
                 $content .= '$p[\'' . $row['name'] . '\']=\'' . $this->escapeSingleQuotes($value) . '\';';
                 if ($row['properties'] != '' || $row['sharedproperties'] != '') {
                     $properties = $modx->parseProperties($row['properties']);
@@ -401,83 +395,5 @@ class Cache
         $modx->invokeEvent('OnCacheUpdate');
 
         return true;
-    }
-
-    /**
-     * @param string $source
-     * @return string
-     *
-     * @see http://php.net/manual/en/tokenizer.examples.php
-     */
-    // phpcs:ignore
-    public function php_strip_whitespace($source)
-    {
-
-        $source = trim($source);
-        if (substr($source, 0, 5) !== '<?php') {
-            $source = '<?php ' . $source;
-        }
-
-        $tokens = token_get_all($source);
-        $_ = '';
-        $prev_token = 0;
-        $chars = explode(' ', '( ) ; , = { } ? :');
-        foreach ($tokens as $i => $token) {
-            if (is_string($token)) {
-                if (in_array($token, array('=', ':'))) {
-                    $_ = trim($_);
-                } elseif (in_array($token, array('(', '{')) && in_array($prev_token, array(T_IF, T_ELSE, T_ELSEIF))) {
-                    $_ = trim($_);
-                }
-                $_ .= $token;
-                if ($prev_token == T_END_HEREDOC) {
-                    $_ .= "\n";
-                }
-                continue;
-            }
-
-            list($type, $text) = $token;
-
-            switch ($type) {
-                case T_COMMENT:
-                case T_DOC_COMMENT:
-                    break;
-                case T_WHITESPACE:
-                    if ($prev_token != T_END_HEREDOC) {
-                        $_ = trim($_);
-                    }
-                    $lastChar = substr($_, -1);
-                    if (!in_array($lastChar, $chars)) { // ,320,327,288,284,289
-                        if (!in_array($prev_token, array(T_FOREACH, T_WHILE, T_FOR, T_BOOLEAN_AND, T_BOOLEAN_OR, T_DOUBLE_ARROW))) {
-                            $_ .= ' ';
-                        }
-                    }
-                    break;
-                case T_IS_EQUAL:
-                case T_IS_IDENTICAL:
-                case T_IS_NOT_EQUAL:
-                case T_DOUBLE_ARROW:
-                case T_BOOLEAN_AND:
-                case T_BOOLEAN_OR:
-                case T_START_HEREDOC:
-                    if ($prev_token != T_START_HEREDOC) {
-                        $_ = trim($_);
-                    }
-                    $prev_token = $type;
-                    $_ .= $text;
-                    break;
-                default:
-                    $prev_token = $type;
-                    $_ .= $text;
-            }
-        }
-        $source = preg_replace(
-            array('@^<\?php@i', '|\s+|', '|<!--|', '|-->|', '|-->\s+<!--|'),
-            array('', ' ', "\n" . '<!--', '-->' . "\n", '-->' . "\n" . '<!--'),
-            $_
-        );
-        $source = trim($source);
-
-        return $source;
     }
 }

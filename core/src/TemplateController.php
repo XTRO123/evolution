@@ -12,9 +12,19 @@ abstract class TemplateController implements \EvolutionCMS\Interfaces\TemplateCo
         return $this->viewData;
     }
 
-    public final function addViewData(array $data)
+    public final function addViewData(...$data)
     {
-        $this->viewData = array_merge($this->viewData, $data);
+        if(empty($data)) return;
+        if(count($data) === 1 && is_array($data[0])) {
+            $this->viewData = array_merge($this->viewData, $data[0]);
+        } else {
+            foreach ($data as $key) {
+                $method = 'get' . $key;
+                if (method_exists($this, $method)) {
+                    $this->viewData[$key] = $this->$method();
+                }
+            }
+        }
     }
 
     public final function getView(): string

@@ -19,6 +19,7 @@ abstract class TemplateController implements \EvolutionCMS\Interfaces\TemplateCo
             $this->viewData = array_merge($this->viewData, $data[0]);
         } else {
             foreach ($data as $key) {
+                if(!is_string($key)) continue;
                 $method = 'get' . $key;
                 if (method_exists($this, $method)) {
                     $this->viewData[$key] = $this->$method();

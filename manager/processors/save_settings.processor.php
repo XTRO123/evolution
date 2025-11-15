@@ -133,7 +133,6 @@ if (isset($data) && count($data) > 0) {
 
     // empty cache
     $modx->clearCache('full');
-    cache()->store('rss')->flush();
 }
 $header = "Location: index.php?a=7&r=10";
 header($header);

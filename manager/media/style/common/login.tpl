@@ -90,7 +90,7 @@
     </form>
 </div>
 <p class="loginLicense"></p>
-<div class="gpl">&copy; 2005-2023 by the <a href="https://evocms.ru/" target="_blank">Evolution CMS</a>. <strong>Evolution CMS</strong>&trade; is licensed under the GPL.</div>
+<div class="gpl">&copy; 2005-2025 by the <a href="https://evo-cms.com/" target="_blank">Evolution CMS</a>. <strong>Evolution CMS</strong>&trade; is licensed under the GPL.</div>
 </body>
 <script>
     /* <![CDATA[ */

@@ -8,7 +8,7 @@ interface TemplateController
 
     public function setView(string $view);
 
-    public function addViewData(array $data);
+    public function addViewData(...$data);
 
     public function getViewData(): array;
 

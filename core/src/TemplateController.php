@@ -32,6 +32,11 @@ abstract class TemplateController implements \EvolutionCMS\Interfaces\TemplateCo
 
     }
 
+    public final function __isset(string $property)
+    {
+        return isset($this->viewData[$property]);
+    }
+
     public final function __get($property)
     {
         if (!empty($property) && array_key_exists($property, $this->viewData)) {

@@ -411,7 +411,7 @@ class Parser
         if(strpos($name, '@VIEW:') === 0) {
             $data['data'] = $data;
 
-            return view($out, $data);
+            return view($out, $data)->render();
         }
         $blade = strpos($name, '@B_') === 0 && $this->bladeEnabled;
         switch (true) {

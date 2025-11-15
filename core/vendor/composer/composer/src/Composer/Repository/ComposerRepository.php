@@ -675,7 +675,7 @@ class ComposerRepository extends ArrayRepository implements ConfigurableReposito
 
                 $promises[] = $this->startCachedAsyncDownload($name, $name)
                     ->then(static function (array $spec) use (&$advisories, &$namesFound, &$packageConstraintMap, $name, $create): void {
-                        [$response, ] = $spec;
+                        [$response] = $spec;
 
                         if (!isset($response['security-advisories']) || !is_array($response['security-advisories'])) {
                             return;
@@ -827,7 +827,7 @@ class ComposerRepository extends ArrayRepository implements ConfigurableReposito
     /**
      * @param  string      $name package name
      * @param array<string, int>|null $acceptableStabilities
-     * @phpstan-param array<string, BasePackage::STABILITY_*>|null $acceptableStabilities
+     * @phpstan-param array<key-of<BasePackage::STABILITIES>, BasePackage::STABILITY_*>|null $acceptableStabilities
      * @param array<string, int>|null $stabilityFlags an array of package name => BasePackage::STABILITY_* value
      * @phpstan-param array<string, BasePackage::STABILITY_*>|null $stabilityFlags
      * @param array<string, array<string, PackageInterface>> $alreadyLoaded
@@ -997,7 +997,7 @@ class ComposerRepository extends ArrayRepository implements ConfigurableReposito
      * @param array<string, ConstraintInterface|null> $packageNames array of package name => ConstraintInterface|null - if a constraint is provided, only
      *                                                packages matching it will be loaded
      * @param array<string, int>|null $acceptableStabilities
-     * @phpstan-param array<string, BasePackage::STABILITY_*>|null $acceptableStabilities
+     * @phpstan-param array<key-of<BasePackage::STABILITIES>, BasePackage::STABILITY_*>|null $acceptableStabilities
      * @param array<string, int>|null $stabilityFlags an array of package name => BasePackage::STABILITY_* value
      * @phpstan-param array<string, BasePackage::STABILITY_*>|null $stabilityFlags
      * @param array<string, array<string, PackageInterface>> $alreadyLoaded
@@ -1129,7 +1129,7 @@ class ComposerRepository extends ArrayRepository implements ConfigurableReposito
      * @param string $name package name (must be lowercased already)
      * @param array<string, mixed> $versionData
      * @param array<string, int>|null $acceptableStabilities
-     * @phpstan-param array<string, BasePackage::STABILITY_*>|null $acceptableStabilities
+     * @phpstan-param array<key-of<BasePackage::STABILITIES>, BasePackage::STABILITY_*>|null $acceptableStabilities
      * @param array<string, int>|null $stabilityFlags an array of package name => BasePackage::STABILITY_* value
      * @phpstan-param array<string, BasePackage::STABILITY_*>|null $stabilityFlags
      */
@@ -1298,7 +1298,6 @@ class ComposerRepository extends ArrayRepository implements ConfigurableReposito
     }
 
     /**
-     * @param string $url
      * @return non-empty-string
      */
     private function canonicalizeUrl(string $url): string
@@ -1447,7 +1446,7 @@ class ComposerRepository extends ArrayRepository implements ConfigurableReposito
 
             return $packageInstances;
         } catch (\Exception $e) {
-            throw new \RuntimeException('Could not load packages '.($packages[0]['name'] ?? json_encode($packages)).' in '.$this->getRepoName().($source ? ' from '.$source : '').': ['.get_class($e).'] '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Could not load packages in '.$this->getRepoName().($source ? ' from '.$source : '').': ['.get_class($e).'] '.$e->getMessage(), 0, $e);
         }
     }
 

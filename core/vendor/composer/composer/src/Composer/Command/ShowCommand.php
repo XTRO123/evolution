@@ -27,7 +27,6 @@ use Composer\Package\Version\VersionSelector;
 use Composer\Pcre\Preg;
 use Composer\Plugin\CommandEvent;
 use Composer\Plugin\PluginEvents;
-use Composer\Repository\ArrayRepository;
 use Composer\Repository\InstalledArrayRepository;
 use Composer\Repository\ComposerRepository;
 use Composer\Repository\CompositeRepository;
@@ -43,6 +42,7 @@ use Composer\Semver\Constraint\ConstraintInterface;
 use Composer\Semver\Semver;
 use Composer\Spdx\SpdxLicenses;
 use Composer\Util\PackageInfo;
+use DateTimeInterface;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
@@ -72,10 +72,7 @@ class ShowCommand extends BaseCommand
     /** @var ?RepositorySet */
     private $repositorySet;
 
-    /**
-     * @return void
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('show')
@@ -270,7 +267,7 @@ EOT
 
             if (!$installedRepo->getPackages()) {
                 $hasNonPlatformReqs = static function (array $reqs): bool {
-                    return (bool) array_filter(array_keys($reqs), function (string $name) {
+                    return (bool) array_filter(array_keys($reqs), static function (string $name) {
                         return !PlatformRepository::isPlatformPackage($name);
                     });
                 };
@@ -493,12 +490,12 @@ EOT
                 $writeVersion = !$input->getOption('name-only') && !$input->getOption('path') && $showVersion;
                 $writeLatest = $writeVersion && $showLatest;
                 $writeDescription = !$input->getOption('name-only') && !$input->getOption('path');
-                $writeReleaseDate = $writeLatest && $input->getOption('sort-by-age');
+                $writeReleaseDate = $writeLatest && ($input->getOption('sort-by-age') || $format === 'json');
 
                 $hasOutdatedPackages = false;
 
                 if ($input->getOption('sort-by-age')) {
-                    usort($packages[$type], function ($a, $b) {
+                    usort($packages[$type], static function ($a, $b) {
                         if (is_object($a) && is_object($b)) {
                             return $a->getReleaseDate() <=> $b->getReleaseDate();
                         }
@@ -550,8 +547,10 @@ EOT
                                     $packageViewData['release-age'] = 'from '.$packageViewData['release-age'];
                                 }
                                 $releaseDateLength = max($releaseDateLength, strlen($packageViewData['release-age']));
+                                $packageViewData['release-date'] = $package->getReleaseDate()->format(DateTimeInterface::ATOM);
                             } else {
                                 $packageViewData['release-age'] = '';
+                                $packageViewData['release-date'] = '';
                             }
                         }
                         if ($writeLatest && $latestPackage) {
@@ -561,6 +560,12 @@ EOT
                             }
                             $packageViewData['latest-status'] = $this->getUpdateStatus($latestPackage, $package);
                             $latestLength = max($latestLength, strlen($packageViewData['latest']));
+
+                            if ($latestPackage->getReleaseDate() !== null) {
+                                $packageViewData['latest-release-date'] = $latestPackage->getReleaseDate()->format(DateTimeInterface::ATOM);
+                            } else {
+                                $packageViewData['latest-release-date'] = '';
+                            }
                         } elseif ($writeLatest) {
                             $packageViewData['latest'] = '[none matched]';
                             $packageViewData['latest-status'] = 'up-to-date';
@@ -808,7 +813,8 @@ EOT
             $pool = $repositorySet->createPoolForPackage($name);
         }
         $matches = $pool->whatProvides($name, $constraint);
-        foreach ($matches as $index => $package) {
+        $literals = [];
+        foreach ($matches as $package) {
             // avoid showing the 9999999-dev alias if the default branch has no branch-alias set
             if ($package instanceof AliasPackage && $package->getVersion() === VersionParser::DEFAULT_BRANCH_ALIAS) {
                 $package = $package->getAliasOf();
@@ -820,11 +826,12 @@ EOT
             }
 
             $versions[$package->getPrettyVersion()] = $package->getVersion();
-            $matches[$index] = $package->getId();
+            $literals[] = $package->getId();
         }
 
         // select preferred package according to policy rules
-        if (null === $matchedPackage && $matches && $preferred = $policy->selectPreferredPackages($pool, $matches)) {
+        if (null === $matchedPackage && \count($literals) > 0) {
+            $preferred = $policy->selectPreferredPackages($pool, $literals);
             $matchedPackage = $pool->literalToPackage($preferred[0]);
         }
 
@@ -965,8 +972,6 @@ EOT
 
     /**
      * print link objects
-     *
-     * @param string                   $title
      */
     protected function printLinks(CompletePackageInterface $package, string $linkType, ?string $title = null): void
     {
@@ -1454,7 +1459,7 @@ EOT
         $stability = $composer->getPackage()->getMinimumStability();
         $flags = $composer->getPackage()->getStabilityFlags();
         if (isset($flags[$name])) {
-            $stability = array_search($flags[$name], BasePackage::$stabilities, true);
+            $stability = array_search($flags[$name], BasePackage::STABILITIES, true);
         }
 
         $bestStability = $stability;
@@ -1498,6 +1503,7 @@ EOT
                 if (str_starts_with($candidate->getVersion(), 'dev-') || str_starts_with($package->getVersion(), 'dev-')) {
                     return false;
                 }
+
                 return version_compare($candidate->getVersion(), $package->getVersion(), '<=');
             };
         }
@@ -1519,7 +1525,7 @@ EOT
         return $this->repositorySet;
     }
 
-    private function getRelativeTime(\DateTimeInterface $releaseDate): string
+    private function getRelativeTime(DateTimeInterface $releaseDate): string
     {
         if ($releaseDate->format('Ymd') === date('Ymd')) {
             return 'today';

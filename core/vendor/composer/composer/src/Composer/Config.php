@@ -61,6 +61,7 @@ class Config
         'classmap-authoritative' => false,
         'apcu-autoloader' => false,
         'prepend-autoloader' => true,
+        'update-with-minimal-changes' => false,
         'github-domains' => ['github.com'],
         'bitbucket-expose-hostname' => true,
         'disable-tls' => false,
@@ -84,6 +85,12 @@ class Config
         'gitlab-token' => [],
         'http-basic' => [],
         'bearer' => [],
+        'custom-headers' => [],
+        'bump-after-update' => false,
+        'allow-missing-requirements' => false,
+        'client-certificate' => [],
+        'forgejo-domains' => ['codeberg.org'],
+        'forgejo-token' => [],
     ];
 
     /** @var array<string, mixed> */
@@ -96,7 +103,7 @@ class Config
 
     /** @var array<string, mixed> */
     private $config;
-    /** @var ?string */
+    /** @var ?non-empty-string */
     private $baseDir;
     /** @var array<int|string, mixed> */
     private $repositories;
@@ -125,7 +132,7 @@ class Config
         $this->config = static::$defaultConfig;
 
         $this->repositories = static::$defaultRepositories;
-        $this->useEnvironment = (bool) $useEnvironment;
+        $this->useEnvironment = $useEnvironment;
         $this->baseDir = is_string($baseDir) && '' !== $baseDir ? $baseDir : null;
 
         foreach ($this->config as $configKey => $configValue) {
@@ -135,6 +142,18 @@ class Config
         foreach ($this->repositories as $configKey => $configValue) {
             $this->setSourceOfConfigValue($configValue, 'repositories.' . $configKey, self::SOURCE_DEFAULT);
         }
+    }
+
+    /**
+     * Changing this can break path resolution for relative config paths so do not call this without knowing what you are doing
+     *
+     * The $baseDir should be an absolute path and without trailing slash
+     *
+     * @param non-empty-string|null $baseDir
+     */
+    public function setBaseDir(?string $baseDir): void
+    {
+        $this->baseDir = $baseDir;
     }
 
     public function setConfigSource(ConfigSourceInterface $source): void
@@ -177,7 +196,7 @@ class Config
         // override defaults with given config
         if (!empty($config['config']) && is_array($config['config'])) {
             foreach ($config['config'] as $key => $val) {
-                if (in_array($key, ['bitbucket-oauth', 'github-oauth', 'gitlab-oauth', 'gitlab-token', 'http-basic', 'bearer'], true) && isset($this->config[$key])) {
+                if (in_array($key, ['bitbucket-oauth', 'github-oauth', 'gitlab-oauth', 'gitlab-token', 'http-basic', 'bearer', 'client-certificate', 'forgejo-token'], true) && isset($this->config[$key])) {
                     $this->config[$key] = array_merge($this->config[$key], $val);
                     $this->setSourceOfConfigValue($val, $key, $source);
                 } elseif (in_array($key, ['allow-plugins'], true) && isset($this->config[$key]) && is_array($this->config[$key]) && is_array($val)) {
@@ -226,6 +245,7 @@ class Config
             $newRepos = array_reverse($config['repositories'], true);
             foreach ($newRepos as $name => $repository) {
                 // disable a repository by name
+                // this is a code path, that will be used less as the next check will be preferred
                 if (false === $repository) {
                     $this->disableRepoByName((string) $name);
                     continue;
@@ -244,7 +264,11 @@ class Config
 
                 // store repo
                 if (is_int($name)) {
-                    $this->repositories[] = $repository;
+                    if (!isset($this->repositories[$name])) {
+                        $this->repositories[$name] = $repository;
+                    } else {
+                        $this->repositories[] = $repository;
+                    }
                     $this->setSourceOfConfigValue($repository, 'repositories.' . array_search($repository, $this->repositories, true), $source);
                 } else {
                     if ($name === 'packagist') { // BC support for default "packagist" named repo
@@ -440,9 +464,9 @@ class Config
                 $result = $this->config[$key];
                 $abandonedEnv = $this->getComposerEnv('COMPOSER_AUDIT_ABANDONED');
                 if (false !== $abandonedEnv) {
-                    if (!in_array($abandonedEnv, $validChoices = [Auditor::ABANDONED_IGNORE, Auditor::ABANDONED_REPORT, Auditor::ABANDONED_FAIL], true)) {
+                    if (!in_array($abandonedEnv, $validChoices = Auditor::ABANDONEDS, true)) {
                         throw new \RuntimeException(
-                            "Invalid value for COMPOSER_AUDIT_ABANDONED: {$abandonedEnv}. Expected ".Auditor::ABANDONED_IGNORE.", ".Auditor::ABANDONED_REPORT." or ".Auditor::ABANDONED_FAIL
+                            "Invalid value for COMPOSER_AUDIT_ABANDONED: {$abandonedEnv}. Expected one of ".implode(', ', Auditor::ABANDONEDS)."."
                         );
                     }
                     $result['abandoned'] = $abandonedEnv;
@@ -529,7 +553,6 @@ class Config
         }
 
         return Preg::replaceCallback('#\{\$(.+)\}#', function ($match) use ($flags) {
-            assert(is_string($match[1]));
             return $this->get($match[1], $flags);
         }, $value);
     }
@@ -545,7 +568,7 @@ class Config
             return $path;
         }
 
-        return $this->baseDir ? $this->baseDir . '/' . $path : $path;
+        return $this->baseDir !== null ? $this->baseDir . '/' . $path : $path;
     }
 
     /**
@@ -579,7 +602,6 @@ class Config
     /**
      * Validates that the passed URL is allowed to be used by current config, or throws an exception.
      *
-     * @param IOInterface $io
      * @param mixed[]     $repoOptions
      */
     public function prohibitUrlByConfig(string $url, ?IOInterface $io = null, array $repoOptions = []): void

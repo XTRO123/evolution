@@ -14,10 +14,10 @@ namespace Composer\EventDispatcher;
 
 use Composer\DependencyResolver\Transaction;
 use Composer\Installer\InstallerEvent;
-use Composer\IO\BufferIO;
 use Composer\IO\ConsoleIO;
 use Composer\IO\IOInterface;
 use Composer\Composer;
+use Composer\Package\PackageInterface;
 use Composer\PartialComposer;
 use Composer\Pcre\Preg;
 use Composer\Plugin\CommandEvent;
@@ -67,13 +67,18 @@ class EventDispatcher
     protected $runScripts = true;
     /** @var list<string> */
     private $eventStack;
+    /** @var list<string> */
+    private $skipScripts;
+    /** @var string|null */
+    private $previousHash = null;
+    /** @var array<string, true> */
+    private $previousListeners = [];
 
     /**
      * Constructor.
      *
      * @param PartialComposer $composer The composer instance
      * @param IOInterface     $io       The IOInterface instance
-     * @param ProcessExecutor $process
      */
     public function __construct(PartialComposer $composer, IOInterface $io, ?ProcessExecutor $process = null)
     {
@@ -81,6 +86,12 @@ class EventDispatcher
         $this->io = $io;
         $this->process = $process ?? new ProcessExecutor($io);
         $this->eventStack = [];
+        $this->skipScripts = array_values(array_filter(
+            array_map('trim', explode(',', (string) Platform::getEnv('COMPOSER_SKIP_SCRIPTS'))),
+            static function ($val) {
+                return $val !== '';
+            }
+        ));
     }
 
     /**
@@ -90,7 +101,7 @@ class EventDispatcher
      */
     public function setRunScripts(bool $runScripts = true): self
     {
-        $this->runScripts = (bool) $runScripts;
+        $this->runScripts = $runScripts;
 
         return $this;
     }
@@ -128,7 +139,7 @@ class EventDispatcher
     {
         assert($this->composer instanceof Composer, new \LogicException('This should only be reached with a fully loaded Composer'));
 
-        return $this->doDispatch(new Script\Event($eventName, $this->composer, $this->io, $devMode, $additionalArgs, $flags));
+        return $this->doDispatch(new ScriptEvent($eventName, $this->composer, $this->io, $devMode, $additionalArgs, $flags));
     }
 
     /**
@@ -202,8 +213,14 @@ class EventDispatcher
                 $return = 0;
                 $this->ensureBinDirIsInPath();
 
-                $formattedEventNameWithArgs = $event->getName() . ($event->getArguments() !== [] ? ' (' . implode(', ', $event->getArguments()) . ')' : '');
+                $additionalArgs = $event->getArguments();
+                if (is_string($callable) && str_contains($callable, '@no_additional_args')) {
+                    $callable = Preg::replace('{ ?@no_additional_args}', '', $callable);
+                    $additionalArgs = [];
+                }
+                $formattedEventNameWithArgs = $event->getName() . ($additionalArgs !== [] ? ' (' . implode(', ', $additionalArgs) . ')' : '');
                 if (!is_string($callable)) {
+                    $this->makeAutoloader($event, $callable);
                     if (!is_callable($callable)) {
                         $className = is_object($callable[0]) ? get_class($callable[0]) : $callable[0];
 
@@ -220,7 +237,12 @@ class EventDispatcher
                     $scriptName = $script[0];
                     unset($script[0]);
 
-                    $args = array_merge($script, $event->getArguments());
+                    $index = array_search('@additional_args', $script, true);
+                    if ($index !== false) {
+                        $args = array_splice($script, $index, 0, $additionalArgs);
+                    } else {
+                        $args = array_merge($script, $additionalArgs);
+                    }
                     $flags = $event->getFlags();
                     if (isset($flags['script-alias-input'])) {
                         $argsString = implode(' ', array_map(static function ($arg) { return ProcessExecutor::escape($arg); }, $script));
@@ -241,7 +263,7 @@ class EventDispatcher
 
                         try {
                             /** @var InstallerEvent $event */
-                            $scriptEvent = new Script\Event($scriptName, $event->getComposer(), $event->getIO(), $event->isDevMode(), $args, $flags);
+                            $scriptEvent = new ScriptEvent($scriptName, $event->getComposer(), $event->getIO(), $event->isDevMode(), $args, $flags);
                             $scriptEvent->setOriginatingEvent($event);
                             $return = $this->dispatch($scriptName, $scriptEvent);
                         } catch (ScriptExecutionException $e) {
@@ -253,6 +275,7 @@ class EventDispatcher
                     $className = substr($callable, 0, strpos($callable, '::'));
                     $methodName = substr($callable, strpos($callable, '::') + 2);
 
+                    $this->makeAutoloader($event, $callable);
                     if (!class_exists($className)) {
                         $this->io->writeError('<warning>Class '.$className.' is not autoloadable, can not call '.$event->getName().' script</warning>', true, IOInterface::QUIET);
                         continue;
@@ -271,6 +294,8 @@ class EventDispatcher
                     }
                 } elseif ($this->isCommandClass($callable)) {
                     $className = $callable;
+
+                    $this->makeAutoloader($event, [$callable, 'run']);
                     if (!class_exists($className)) {
                         $this->io->writeError('<warning>Class '.$className.' is not autoloadable, can not call '.$event->getName().' script</warning>', true, IOInterface::QUIET);
                         continue;
@@ -291,15 +316,20 @@ class EventDispatcher
                     }
                     $app->setAutoExit(false);
                     $cmd = new $className($event->getName());
-                    $app->add($cmd);
+                    if (method_exists($app, 'addCommand')) {
+                        $app->addCommand($cmd);
+                    } else {
+                        // Compatibility layer for symfony/console <7.4
+                        $app->add($cmd);
+                    }
                     $app->setDefaultCommand((string) $cmd->getName(), true);
                     try {
-                        $args = implode(' ', array_map(static function ($arg) { return ProcessExecutor::escape($arg); }, $event->getArguments()));
+                        $args = implode(' ', array_map(static function ($arg) { return ProcessExecutor::escape($arg); }, $additionalArgs));
                         // reusing the output from $this->io is mostly needed for tests, but generally speaking
                         // it does not hurt to keep the same stream as the current Application
                         if ($this->io instanceof ConsoleIO) {
                             $reflProp = new \ReflectionProperty($this->io, 'output');
-                            if (PHP_VERSION_ID < 80100) {
+                            if (\PHP_VERSION_ID < 80100) {
                                 $reflProp->setAccessible(true);
                             }
                             $output = $reflProp->getValue($this->io);
@@ -313,24 +343,32 @@ class EventDispatcher
                         throw $e;
                     }
                 } else {
-                    $args = implode(' ', array_map(['Composer\Util\ProcessExecutor', 'escape'], $event->getArguments()));
+                    $args = implode(' ', array_map(['Composer\Util\ProcessExecutor', 'escape'], $additionalArgs));
 
                     // @putenv does not receive arguments
                     if (strpos($callable, '@putenv ') === 0) {
                         $exec = $callable;
                     } else {
-                        $exec = $callable . ($args === '' ? '' : ' '.$args);
+                        if (str_contains($callable, '@additional_args')) {
+                            $exec = str_replace('@additional_args', $args, $callable);
+                        } else {
+                            $exec = $callable . ($args === '' ? '' : ' '.$args);
+                        }
                     }
 
                     if ($this->io->isVerbose()) {
                         $this->io->writeError(sprintf('> %s: %s', $event->getName(), $exec));
-                    } elseif ($event->getName() !== '__exec_command') {
+                    } elseif (
                         // do not output the command being run when using `composer exec` as it is fairly obvious the user is running it
+                        $event->getName() !== '__exec_command'
+                        // do not output the command being run when using `composer <script-name>` as it is also fairly obvious the user is running it
+                        && ($event->getFlags()['script-alias-input'] ?? null) === null
+                    ) {
                         $this->io->writeError(sprintf('> %s', $exec));
                     }
 
                     $possibleLocalBinaries = $this->composer->getPackage()->getBinaries();
-                    if ($possibleLocalBinaries) {
+                    if (count($possibleLocalBinaries) > 0) {
                         foreach ($possibleLocalBinaries as $localExec) {
                             if (Preg::isMatch('{\b'.preg_quote($callable).'$}', $localExec)) {
                                 $caller = BinaryInstaller::determineBinaryCaller($localExec);
@@ -354,7 +392,7 @@ class EventDispatcher
                         $pathAndArgs = substr($exec, 5);
                         if (Platform::isWindows()) {
                             $pathAndArgs = Preg::replaceCallback('{^\S+}', static function ($path) {
-                                return str_replace('/', '\\', (string) $path[0]);
+                                return str_replace('/', '\\', $path[0]);
                             }, $pathAndArgs);
                         }
                         // match somename (not in quote, and not a qualified path) and if it is not a valid path from CWD then try to find it
@@ -384,8 +422,6 @@ class EventDispatcher
 
                         if (Platform::isWindows()) {
                             $exec = Preg::replaceCallback('{^\S+}', static function ($path) {
-                                assert(is_string($path[0]));
-
                                 return str_replace('/', '\\', $path[0]);
                             }, $exec);
                         }
@@ -455,7 +491,7 @@ class EventDispatcher
             throw new \RuntimeException('Failed to locate PHP binary to execute '.$phpPath);
         }
         $phpArgs = $finder->findArguments();
-        $phpArgs = $phpArgs ? ' ' . implode(' ', $phpArgs) : '';
+        $phpArgs = \count($phpArgs) > 0 ? ' ' . implode(' ', $phpArgs) : '';
         $allowUrlFOpenFlag = ' -d allow_url_fopen=' . ProcessExecutor::escape(ini_get('allow_url_fopen'));
         $disableFunctionsFlag = ' -d disable_functions=' . ProcessExecutor::escape(ini_get('disable_functions'));
         $memoryLimitFlag = ' -d memory_limit=' . ProcessExecutor::escape(ini_get('memory_limit'));
@@ -572,22 +608,11 @@ class EventDispatcher
             return [];
         }
 
-        assert($this->composer instanceof Composer, new \LogicException('This should only be reached with a fully loaded Composer'));
+        if (in_array($event->getName(), $this->skipScripts, true)) {
+            $this->io->writeError('Skipped script listeners for <info>'.$event->getName().'</info> because of COMPOSER_SKIP_SCRIPTS', true, IOInterface::VERBOSE);
 
-        if ($this->loader) {
-            $this->loader->unregister();
+            return [];
         }
-
-        $generator = $this->composer->getAutoloadGenerator();
-        if ($event instanceof ScriptEvent) {
-            $generator->setDevMode($event->isDevMode());
-        }
-
-        $packages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
-        $packageMap = $generator->buildPackageMap($this->composer->getInstallationManager(), $package, $packages);
-        $map = $generator->parseAutoloads($packageMap, $package);
-        $this->loader = $generator->createLoader($map, $this->composer->getConfig()->get('vendor-dir'));
-        $this->loader->register(false);
 
         return $scripts[$event->getName()];
     }
@@ -613,7 +638,7 @@ class EventDispatcher
      */
     protected function isComposerScript(string $callable): bool
     {
-        return strpos($callable, '@') === 0 && strpos($callable, '@php ') !== 0 && strpos($callable, '@putenv ') !== 0;
+        return str_starts_with($callable, '@') && !str_starts_with($callable, '@php ') && !str_starts_with($callable, '@putenv ');
     }
 
     /**
@@ -678,5 +703,59 @@ class EventDispatcher
 
         // not great but also do not want to break everything here
         return 'unsupported';
+    }
+
+    /**
+     * @param mixed $callable Technically a callable shape but as the class may not be autoloadable yet PHP might not see it this way, so we cannot type hint as such
+     */
+    private function makeAutoloader(Event $event, $callable): void
+    {
+        assert($this->composer instanceof Composer, new \LogicException('This should only be reached with a fully loaded Composer'));
+
+        if (is_array($callable)) {
+            if (is_string($callable[0])) {
+                $callableKey = $callable[0] . '::' . $callable[1];
+            } else {
+                $callableKey = get_class($callable[0]).'::'.$callable[1];
+            }
+        } elseif (is_string($callable)) {
+            $callableKey = $callable;
+        } elseif ($callable instanceof \Closure) {
+            $callableKey = 'closure';
+        } else {
+            $callableKey = 'unknown';
+        }
+        if (isset($this->previousListeners[$callableKey])) {
+            return;
+        }
+        $this->previousListeners[$callableKey] = true;
+
+        $package = $this->composer->getPackage();
+        $packages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
+        $generator = $this->composer->getAutoloadGenerator();
+        $hash = implode(',', array_map(static function (PackageInterface $p) {
+            return $p->getName().'/'.$p->getVersion();
+        }, $packages));
+        if ($event instanceof ScriptEvent || $event instanceof PackageEvent || $event instanceof InstallerEvent) {
+            $generator->setDevMode($event->isDevMode());
+            $hash .= $event->isDevMode() ? '/dev' : '';
+        }
+        $hash = hash('sha256', $hash);
+
+        if ($this->previousHash === $hash) {
+            return;
+        }
+
+        $this->previousHash = $hash;
+
+        $packageMap = $generator->buildPackageMap($this->composer->getInstallationManager(), $package, $packages);
+        $map = $generator->parseAutoloads($packageMap, $package);
+
+        if ($this->loader !== null) {
+            $this->loader->unregister();
+        }
+
+        $this->loader = $generator->createLoader($map, $this->composer->getConfig()->get('vendor-dir'));
+        $this->loader->register(false);
     }
 }

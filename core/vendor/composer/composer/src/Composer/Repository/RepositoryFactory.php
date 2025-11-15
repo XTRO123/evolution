@@ -99,10 +99,6 @@ class RepositoryFactory
         return self::createRepos($rm, $config->getRepositories());
     }
 
-    /**
-     * @param  EventDispatcher   $eventDispatcher
-     * @param  HttpDownloader    $httpDownloader
-     */
     public static function manager(IOInterface $io, Config $config, ?HttpDownloader $httpDownloader = null, ?EventDispatcher $eventDispatcher = null, ?ProcessExecutor $process = null): RepositoryManager
     {
         if ($httpDownloader === null) {
@@ -178,7 +174,7 @@ class RepositoryFactory
     /**
      * @param int|string $index
      * @param array{url?: string} $repo
-     * @param array<string, mixed> $existingRepos
+     * @param array<int|string, mixed> $existingRepos
      */
     public static function generateRepositoryName($index, array $repo, array $existingRepos): string
     {

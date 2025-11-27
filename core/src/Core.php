@@ -4870,10 +4870,11 @@ class Core extends AbstractLaravel implements Interfaces\CoreInterface
             $query = (is_numeric($idnames[0]) ? $table . '.id' : $table . '.name') . " IN ('" . implode("','", $idnames) . "')";
         }
 
+        $fields[] = 'site_tmplvars.id as tmplvarid';
+
         $rs = SiteTmplvar::query()
             ->select($fields)
             ->selectRaw(" IF(" . $this->getDatabase()->getConfig('prefix') . "site_tmplvar_contentvalues.value != '', " . $this->getDatabase()->getConfig('prefix') . "site_tmplvar_contentvalues.value, " . $this->getDatabase()->getConfig('prefix') . "site_tmplvars.default_text) as value")
-            ->selectRaw(" IF(" . $this->getDatabase()->getConfig('prefix') . "site_tmplvar_contentvalues.value != '', " . $this->getDatabase()->getConfig('prefix') . "site_tmplvar_contentvalues.value, " . $this->getDatabase()->getConfig('prefix') . "site_tmplvars.id) as tmplvarid")
             ->join('site_tmplvar_templates', 'site_tmplvar_templates.tmplvarid', '=', 'site_tmplvars.id')
             ->leftJoin('site_tmplvar_contentvalues', function ($join) use ($docid) {
                 $join->on('site_tmplvar_contentvalues.tmplvarid', '=', 'site_tmplvars.id');

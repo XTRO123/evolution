@@ -5,8 +5,7 @@ $installMode = 1;
 ?>
 
 <script>
-	parent.$.fancybox.close();
-	parent.jQuery.fancybox.close();
+	parent.Fancybox.close();
 </script>
 <!--
 <h2>Загрузите пакет для установки</h2>

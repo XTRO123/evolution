@@ -29,7 +29,7 @@ if ($errors == 0) {
 }
 ?>
     <p class="buttonlinks">
-        <a href="javascript:parent.jQuery.fancybox.close();" title="<?php echo $_lang['btnclose_value']?>"><span><?php echo $_lang['btnclose_value']?></span></a>
+        <a href="javascript:parent.Fancybox.close();" title="<?php echo $_lang['btnclose_value']?>"><span><?php echo $_lang['btnclose_value']?></span></a>
     </p>
 	<br />
 </form>

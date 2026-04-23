@@ -131,52 +131,45 @@ if ($limit > 0) {
 ?>
     </div>
     <p class="buttonlinks">
-        <!-- тут кнопку отменить разве что поставить<a href="javascript:document.getElementById('install_form').action='index.php?action=<?php echo ((isset($installMode) && $installMode == 1) ? 'mode' : 'connection'); ?>';document.getElementById('install_form').submit();" class="prev" title="<?php echo $_lang['btnback_value']?>"><span><?php echo $_lang['btnback_value']?></span></a>-->
         <a href="javascript:document.getElementById('install_form').submit();" title="<?php echo $_lang['install']?>"><span><?php echo $_lang['install']?></span></a>
     </p>
 
 </form>
-<script type="text/javascript" src="<?php echo MODX_SITE_URL;?>assets/modules/store/installer/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="<?php echo MODX_SITE_URL;?>assets/js/jquery.min.js"></script>
 <script type="text/javascript">
-    $(document).ready(function(){
-
-        jQuery('#toggle_check_all').click(function(evt){
-            evt.preventDefault();
-            demo = jQuery('#installdata_field').attr('checked');
-            jQuery('input:checkbox.toggle:not(:disabled)').attr('checked', true);
-        });
-        jQuery('#toggle_check_none').click(function(evt){
-            evt.preventDefault();
-            demo = jQuery('#installdata_field').attr('checked');
-            jQuery('input:checkbox.toggle:not(:disabled)').attr('checked', false);
-        });
-        jQuery('#toggle_check_toggle').click(function(evt){
-            evt.preventDefault();
-            jQuery('input:checkbox.toggle:not(:disabled)').attr('checked', function(){
-                return !jQuery(this).attr('checked');
+    (function($) {
+        $(document).ready(function(){
+            $('#toggle_check_all').click(function(evt){
+                evt.preventDefault();
+                $('input:checkbox.toggle:not(:disabled)').prop('checked', true);
             });
-        });
-        jQuery('#installdata_field').click(function(evt){
+            $('#toggle_check_none').click(function(evt){
+                evt.preventDefault();
+                $('input:checkbox.toggle:not(:disabled)').prop('checked', false);
+            });
+            $('#toggle_check_toggle').click(function(evt){
+                evt.preventDefault();
+                $('input:checkbox.toggle:not(:disabled)').prop('checked', function(i, val){
+                    return !val;
+                });
+            });
+            $('#installdata_field').click(function(evt){
+                handleSampleDataCheckbox();
+            });
+
+            var handleSampleDataCheckbox = function(){
+                var demo = $('#installdata_field').prop('checked');
+                $('input:checkbox.toggle.demo').each(function(){
+                    if(demo) {
+                        $(this).prop('checked', true).prop('disabled', true);
+                    } else {
+                        $(this).prop('disabled', false);
+                    }
+                });
+            };
+
+            // handle state of demo content checkbox on page load
             handleSampleDataCheckbox();
         });
-
-        var handleSampleDataCheckbox = function(){
-            demo = jQuery('#installdata_field').attr('checked');
-            jQuery('input:checkbox.toggle.demo').each(function(ix, el){
-                if(demo) {
-                    jQuery(this)
-                        .attr('checked', true)
-                        .attr('disabled', true)
-                    ;
-                } else {
-                    jQuery(this)
-                        .attr('disabled', false)
-                    ;
-                }
-            });
-        }
-
-        // handle state of demo content checkbox on page load
-        handleSampleDataCheckbox();
-    });
+    })(jQuery);
 </script>

@@ -1,14 +1,14 @@
 var url = decodeURIComponent(window.location.href);
 var _GET = decodeURIComponent(window.location.search.slice(1))
-        .split('&')
-        .reduce(function _reduce (a,b) {
-          b = b.split('=');
-          if (a[b[0]]) {
-            if (is_array(a[b[0]])) {a[b[0]].push(b[1])}
-            else {var arr=[];arr.push(a[b[0]]);arr.push( b[1]);a[b[0]]=arr;}
-          } else {a[b[0]] = b[1];}
-          return a;
-        }, {});
+	.split('&')
+	.reduce(function _reduce (a,b) {
+		b = b.split('=');
+		if (a[b[0]]) {
+			if (Array.isArray(a[b[0]])) {a[b[0]].push(b[1])}
+			else {var arr=[];arr.push(a[b[0]]);arr.push( b[1]);a[b[0]]=arr;}
+		} else {a[b[0]] = b[1];}
+		return a;
+	}, {});
 
 function link(){
 	mass = location.href.split('?');
@@ -75,7 +75,7 @@ store = {
 	},
 	logout: function(){
 		$.ajax({url:link()+"&action=exituser",type:'POST',data:{res:$('[name="hash"]').val()},success:function(){
-		window.location.href = window.location.href
+			window.location.href = window.location.href
 		}});
 	},
 	login:function(){
@@ -108,8 +108,8 @@ store = {
 
 			var version = $('.version').html();
 			if (data.version != version && version != '0.1.3') {
-					$('.new_version').html(data.version);
-					$('#actions').show();
+				$('.new_version').html(data.version);
+				$('#actions').show();
 			}
 
 			if (data.user) {
@@ -118,32 +118,33 @@ store = {
 			}
 		});
 
-		store.types =  eval('('+$('[name="types"]').val()+')');
+		store.types = JSON.parse($('[name="types"]').val());
 
-		$('a.item-reinstall,a.item-update').live('click',function(){
+		$(document).on('click', 'a.item-reinstall,a.item-update',function(e){
 			if (confirm($(this).attr('data-text'))) store.install(this);
 			return false;
 		});
-		$('a.item-install').live('click',function(){
+
+		$(document).on('click','a.item-install',function(e){
 			store.install(this);
 			return false;
 		});
 
-		$('.item-install2').live('click',function(){
+		$(document).on('click','a.item-install2',function(e){
 			tpl = '<li data-id="'+$(this).attr('data-id')+'">'+$(this).parent().find('.row-category').text()+'<a href="#">X</a></li>';
 			$('.cart_list ul').append(tpl);
 			return false;
 		});
 
-		$('.category_list a').live('click',function(){
+		$(document).on('click', '.category_list a', function (e) {
 			$('[name=parent]').val($(this).attr('data-id'));
 			//store.get_list({}, store.update_list );
 
-			store.update_list( store.category[$(this).attr('data-id')] , $(this).attr('data-tpl') );
+			store.update_list(store.category[$(this).attr('data-id')], $(this).attr('data-tpl'));
 			return false;
 		});
 
-		$('.category_list2 a').live('click',function(){
+		$(document).on('click','.category_list2 a',function(e){
 			$('[name=parent]').val($(this).html());
 			store.get_own_list({}, store.updateUserPack );
 			return false;
@@ -155,46 +156,46 @@ store = {
 
 		var file;
 		$('#install_file').on('change', function() {
-            file = this.files[0];
-		    console.log(file);
-        });
+			file = this.files[0];
+			console.log(file);
+		});
 
-        $('#install_file_btn').on('click', function() {
-            if($.isEmptyObject( file )) return;
-            $('#install_file_resp').html('');
-            $('#install_file_prg').fadeIn();
-            $.ajax({
-                url: link()+'&method=fast',
-                type: 'POST',
-                data: new FormData($('#install_file_form')[0]),
-                cache: false, contentType: false, processData: false,
+		$('#install_file_btn').on('click', function() {
+			if($.isEmptyObject( file )) return;
+			$('#install_file_resp').html('');
+			$('#install_file_prg').fadeIn();
+			$.ajax({
+				url: link()+'&method=fast',
+				type: 'POST',
+				data: new FormData($('#install_file_form')[0]),
+				cache: false, contentType: false, processData: false,
 
-                // Custom XMLHttpRequest
-                xhr: function() {
-                    var myXhr = $.ajaxSettings.xhr();
-                    if (myXhr.upload) {
-                        // For handling the progress of the upload
-                        myXhr.upload.addEventListener('progress', function(e) {
-                            if (e.lengthComputable) {
-                                $('progress').attr({
-                                    value: e.loaded,
-                                    max: e.total,
-                                });
-                            }
-                        } , false);
-                    }
-                    return myXhr;
-                },
-            }).done(function(resp){
-                $('#install_file_resp').html(resp);
-                $('#install_file_prg').fadeOut();
-                console.log("Success: File sent!");
-            }).fail(function(resp){
-                $('#install_file_resp').html(resp);
-                $('#install_file_prg').fadeOut();
-                console.log("Error: File couldn't be sent!");
-            });
-        });
+				// Custom XMLHttpRequest
+				xhr: function() {
+					var myXhr = $.ajaxSettings.xhr();
+					if (myXhr.upload) {
+						// For handling the progress of the upload
+						myXhr.upload.addEventListener('progress', function(e) {
+							if (e.lengthComputable) {
+								$('progress').attr({
+									value: e.loaded,
+									max: e.total,
+								});
+							}
+						} , false);
+					}
+					return myXhr;
+				},
+			}).done(function(resp){
+				$('#install_file_resp').html(resp);
+				$('#install_file_prg').fadeOut();
+				console.log("Success: File sent!");
+			}).fail(function(resp){
+				$('#install_file_resp').html(resp);
+				$('#install_file_prg').fadeOut();
+				console.log("Error: File couldn't be sent!");
+			});
+		});
 	},
 	install:function(elm){
 
@@ -206,7 +207,7 @@ store = {
 
 		if ($(elm).attr('data-method') == "package"){
 			var install_url = link() + "&action=install&cid="+$(elm).attr('data-id')+"&name="+$(elm).attr('data-name')+"&dependencies="+$(elm).attr('data-dependencies')+"&file="+file;
-			$.fancybox.open({href : install_url, type: 'iframe'});
+			Fancybox.show([{src: install_url, type: 'iframe'}]);
 		} else {
 			$('.item_list .catalog_item').addClass('blocked');
 			$(elm).closest('.catalog_item').find('.loader').show();
@@ -218,15 +219,15 @@ store = {
 					console.log(data);
 
 					el.closest('.catalog_item').find('.loader').hide();
-                    if (data.result == 'error') {
-                        $.fancybox.open(data.data);
-                    } else {
-                        el.css('display', 'block').animate({opacity: 1}, 500, function () {
-                            el.delay(2000).animate({opacity: 0}, 3000, function () {
-                                el.css('display', 'none')
-                            });
-                        });
-                    }
+					if (data.result == 'error') {
+						Fancybox.show(data.data);
+					} else {
+						el.css('display', 'block').animate({opacity: 1}, 500, function () {
+							el.delay(2000).animate({opacity: 0}, 3000, function () {
+								el.css('display', 'none')
+							});
+						});
+					}
 					el.closest('.catalog_item').removeClass('item-install').removeClass('item-update').addClass('item-reinstall');
 					el.closest('.catalog_item').find('.curr').hide();
 
@@ -263,7 +264,7 @@ store = {
 	get_own_list: function( param , callback){
 		$('.item_list >  .loader').show();
 		store.query('get_own_list',$.extend(param,{parent:$('[name=parent]').val(),sort:$('[name=sort]').val(),dir:$('[name=dir]').val()}),function(data){
-		callback(data)
+			callback(data)
 		});
 	},
 
@@ -286,11 +287,11 @@ store = {
 		var out='';
 		if (data){
 			$.each( data , function( key, value ) {
-			try {
-				out = out + store.parse_list_item(tpl, value , template);
-			} catch(e){
-				console.log( e.name );
-			}
+				try {
+					out = out + store.parse_list_item(tpl, value , template);
+				} catch(e){
+					console.log( e.name );
+				}
 			});
 		} else {
 			//console.log(data);
@@ -371,8 +372,8 @@ store = {
 		return out;
 	},
 	is_array: function(inputArray) {
-            return inputArray && !(inputArray.propertyIsEnumerable('length')) && typeof inputArray === 'object' && typeof inputArray.length === 'number';
-        }
+		return inputArray && !(inputArray.propertyIsEnumerable('length')) && typeof inputArray === 'object' && typeof inputArray.length === 'number';
+	}
 };
 
 $(function(){

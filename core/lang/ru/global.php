@@ -12,7 +12,6 @@
  *
  * Please commit your language changes on Transifex (https://www.transifex.com/projects/p/modx-evolution/) or on GitHub (https://github.com/modxcms/evolution).
  */
-
 $_lang["about_msg"] = 'Evolution CMS — это платформа для создания сайтов на языке PHP и система управления контентом, распространяемая под лицензией <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU GPL</a>.';
 $_lang["about_title"] = 'Об Evolution CMS';
 
@@ -1044,7 +1043,7 @@ $_lang["reset"] = 'Сброс';
 $_lang["reset_failedlogins"] = 'сброс';
 $_lang["reset_sort_order"] = 'Сброс сортировки';
 
-$_lang["manager_access_permissions"] = 'Доступ в админку';
+$_lang["manager_access_permissions"] = 'Доступ в панель управления сайтом';
 $_lang["manage_groups"] = 'Управление группами документов и пользователей';
 $_lang["manage_document_permissions"] = 'Управление доступом к документам';
 $_lang["manage_module_permissions"] = 'Управление доступом к модулям';

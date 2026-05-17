@@ -12,7 +12,6 @@
  *
  * Please commit your language changes on Transifex (https://www.transifex.com/projects/p/modx-evolution/) or on GitHub (https://github.com/modxcms/evolution).
  */
-
 $_lang["about_msg"] = 'Evolution CMS — это платформа для создания сайтов на языке PHP и система управления контентом, распространяемая под лицензией <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU GPL</a>.';
 $_lang["about_title"] = 'Об Evolution CMS';
 
@@ -56,7 +55,7 @@ $_lang["tmplvar"] = 'Дополнительные поля';
 $_lang["tmplvars"] = 'Параметры (TV)';
 $_lang["tmplvar_access_msg"] = 'Выберите группы ресурсов, в которых разрешена смена этого Дополнительного Параметра (TV)';
 $_lang["tmplvar_change_template_msg"] = 'Смена шаблона повлечет перезагрузку страницы. Все несохраненные изменения будут утеряны. \n\nВы уверены в том, что хотите сменить шаблон?';
-$_lang["tmplvar_inuse"] = 'Этот Параметр (TV) используют следующие шаблоны. Чтобы продолжить процесс удаления, нажмите \'Удалить\', для отмены - нажмите \'Отмена\'.';
+$_lang["tmplvar_inuse"] = 'Этот Параметр (TV) используется в следующих ресурсах. Чтобы продолжить процесс удаления, нажмите \'Удалить\', для отмены - нажмите \'Отмена\'.';
 $_lang["tmplvar_tmpl_access"] = 'Доступ шаблонов';
 $_lang["tmplvar_tmpl_access_msg"] = 'Укажите шаблоны, которые могут использовать этот Параметр (TV)';
 $_lang["tmplvars_binding_msg"] = 'Это поле поддерживает привязку данных с использованием @-команд';
@@ -1044,7 +1043,7 @@ $_lang["reset"] = 'Сброс';
 $_lang["reset_failedlogins"] = 'сброс';
 $_lang["reset_sort_order"] = 'Сброс сортировки';
 
-$_lang["manager_access_permissions"] = 'Доступ в админку';
+$_lang["manager_access_permissions"] = 'Доступ в панель управления сайтом';
 $_lang["manage_groups"] = 'Управление группами документов и пользователей';
 $_lang["manage_document_permissions"] = 'Управление доступом к документам';
 $_lang["manage_module_permissions"] = 'Управление доступом к модулям';
@@ -1091,7 +1090,7 @@ $_lang["server_protocol_https"] = 'https';
 $_lang["server_protocol_message"] = 'Если ваш сайт использует https-соединения, укажите это здесь.';
 $_lang["server_protocol_title"] = 'Тип сервера:';
 $_lang["serveroffset"] = 'Поправка ко времени на сервере';
-$_lang["serveroffset_message"] = 'Выберите поправку (количество часов) между временем на месте вашего пребывания и на месте нахождения сервера. Текущее время на сервере - <b>[%s]</b>, текущее время на сервере с учетом временной поправки - <b>[%s]</b>.';
+$_lang["serveroffset_message"] = 'Выберите поправку (количество часов) между временем на месте вашего пребывания и на месте нахождения сервера. Текущее время на сервере - <b>[%s]</b>, текущее время на сервере, с учетом временной поправки, - <b>[%s]</b>.';
 $_lang["serveroffset_title"] = 'Разница во времени:';
 $_lang["servertime"] = 'Время на сервере';
 $_lang["set_automatic"] = 'Автоматически';

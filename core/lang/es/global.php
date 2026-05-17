@@ -12,7 +12,6 @@
  *
  * Please commit your language changes on Transifex (https://www.transifex.com/projects/p/modx-evolution/) or on GitHub (https://github.com/modxcms/evolution).
  */
-
 $_lang["about_msg"] = 'Evolution CMS es <a href="https://evo-cms.com/" target="_blank">un marco de aplicación PHP y un sistema de gestión de contenido</a> con la licencia <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU GPL</a>.';
 $_lang["about_title"] = 'Aprender sobre el Evolution CMS';
 
@@ -883,7 +882,7 @@ $_lang["meta_keywords"] = 'Palabras META clave';
 $_lang["metatag_intro"] = 'Esta página permita eliminar, crear o editar las etiquetas META. Para vincular las etiquetas META a los recursos, haga usted clic en la pestaña Palabras clave META al editar el recurso y seleccione usted las etiquetas META y las palabras clave deseadas. Para agregar una nueva etiqueta, ingrese usted el nombre y el valor y haga usted clic en el botón \'Agregar etiqueta\'. Para editar la etiqueta, haga usted clic en el nombre de la etiqueta dentro de la cuadrícula de datos.';
 $_lang["metatag_notice"] = 'Quizá quiera ver la <a href="http://www.html-reference.com/META.asp" target="_blank">Guía de Referencia HTML</a> para obtener más información. Esta lista no es una lista completa de posibles etiquetas Meta.</a>';
 $_lang["metatags"] = 'Etiquetas META';
-$_lang["mgr_access_permissions"] = 'Permisos de acceso de administrador';
+$_lang["mgr_access_permissions"] = 'Acceso al panel de control del sitio';
 $_lang["mgr_login_start"] = 'Inicio de entrada al administrador';
 $_lang["mgr_login_start_message"] = 'Ingrese el ID del recurso al que quieres enviar al usuario después de que haya salido del Administrador.
 <b>Nota:</b> asegúrese que el ID ingresado pertenece a un recurso existente y que ha sido publicado ¡y es accesible por el usuario!';

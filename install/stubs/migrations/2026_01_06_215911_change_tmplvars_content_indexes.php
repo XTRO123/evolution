@@ -22,7 +22,7 @@ return new class extends Migration
 
             // remove fulltext
             if ($indexesFound->contains('value_ft_idx')) {
-                // миграция так не умеет, зато умеет DB
+                // - миграция так не умеет, зато умеет DB
                 DB::statement('DROP INDEX value_ft_idx ON ' . DB::getTablePrefix() . $table->getTable());
             }
 
@@ -43,23 +43,29 @@ return new class extends Migration
             // contentid = idx_contentid
             $table->index('contentid', 'idx_contentid');
 
-            // tmplvarid + contentid = idx_tmplvarid_contentid
-            $table->index(['tmplvarid', 'contentid'], 'idx_tmplvarid_contentid');
+            // tmplvarid + contentid = uq_tmplvarid_contentid
+            $table->unique(['tmplvarid', 'contentid'], 'uq_tmplvarid_contentid');
+
+            // tmplvarid + value(50) = idx_tmplvarid_value_prefix
+            // - миграция так не умеет
+            // $table->index(['tmplvarid', 'value(50)'], 'idx_tmplvarid_value_prefix');
+            // - зато умеет DB
+            DB::statement('CREATE INDEX idx_tmplvarid_value_prefix ON ' . DB::getTablePrefix() . $table->getTable() . ' (tmplvarid, value(50))');
 
             // value(50) = idx_value_prefix
-            // миграция так не умеет
+            // - миграция так не умеет
             // $table->index('value(50)', 'idx_value_prefix');
-            // зато умеет DB
+            // - зато умеет DB
             DB::statement('CREATE INDEX idx_value_prefix ON ' . DB::getTablePrefix() . $table->getTable() . ' (value(50))');
 
             // value = idx_value_ft
-            $table->fulltext('value', 'idx_value_ft');
+            $table->fulltext('value', 'ft_value');
 
             // tmplvarid + contentid + value(50) = idx_tmplvarid_contentid_value
-            // миграция так не умеет
+            // - миграция так не умеет
             //$table->index(['tmplvarid', 'contentid', 'value'], 'idx_tmplvarid_contentid_value');
-            // зато умеет DB
-            DB::statement('CREATE INDEX idx_tmplvarid_contentid_value ON ' . DB::getTablePrefix() . $table->getTable() . ' (tmplvarid, contentid, value(50))');
+            // - зато умеет DB
+            DB::statement('CREATE INDEX idx_tmplvarid_contentid_value_prefix ON ' . DB::getTablePrefix() . $table->getTable() . ' (tmplvarid, contentid, value(50))');
         });
     }
 
@@ -74,17 +80,18 @@ return new class extends Migration
             // remove
             $table->dropIndex('idx_tmplvarid');
             $table->dropIndex('idx_contentid');
-            $table->dropIndex('idx_tmplvarid_contentid');
+            $table->dropIndex('uq_tmplvarid_contentid');
+            $table->dropIndex('idx_tmplvarid_value_prefix');
             $table->dropIndex('idx_value_prefix');
-            $table->dropIndex('idx_tmplvarid_contentid_value');
+            $table->dropIndex('idx_tmplvarid_contentid_value_prefix');
 
             // миграция так не умеет, зато умеет DB
-            DB::statement('DROP INDEX idx_value_ft ON ' . DB::getTablePrefix() . $table->getTable());
+            DB::statement('DROP INDEX ft_value ON ' . DB::getTablePrefix() . $table->getTable());
         });
 
         Schema::table('site_tmplvar_contentvalues', function (Blueprint $table) {
             // restore as of 3.1.30
-            $table->index(['tmplvarid', 'contentid'], 'ix_tvid_contentid');
+            $table->unique(['tmplvarid', 'contentid'], 'ix_tvid_contentid');
             $table->index('tmplvarid', 'idx_tmplvarid');
             $table->index('contentid', 'idx_id');
             $table->fulltext('value', 'value_ft_idx');

@@ -1,4 +1,5 @@
-<?php namespace EvolutionCMS\Controllers;
+<?php
+namespace EvolutionCMS\Controllers;
 
 use EvolutionCMS\Interfaces\ManagerTheme;
 
@@ -135,17 +136,22 @@ class ManagerLog extends AbstractController implements ManagerTheme\PageControll
         // set page size to 0 t show all items
         $grd = new \EvolutionCMS\Support\DataGrid('', $items, $this->amount);
 
-        $grd->pagerClass = '';
-        $grd->pagerStyle = 'white-space: normal;';
-        $grd->pageClass = 'page-item';
-        $grd->selPageClass = 'page-item active';
-
         $grd->noRecordMsg = $this->managerTheme->getLexicon('no_records_found');
+
         $grd->cssClass = 'table data nowrap';
         $grd->columnHeaderClass = 'tableHeader';
         $grd->itemClass = 'tableItem overflow-hidden';
         $grd->altItemClass = 'tableAltItem';
+        $grd->pagerClass = '';
+        $grd->pageClass = 'page-item';
+        $grd->selPageClass = 'page-item active';
+
+        $grd->pagerStyle = 'white-space: normal;';
+
         $grd->fields = 'username,action,itemid,itemname,timestamp,ip,useragent';
+
+        // $grd->pageSize = $this->amount;
+        $grd->pagerLocation = 'both-left';
 
         $columns = [
             [ // username

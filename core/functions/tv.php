@@ -476,15 +476,17 @@ if (!function_exists('getTVDisplayFormat')) {
 
                 $grd->noRecordMsg = $params['egmsg'];
 
-                $grd->columnHeaderClass = $params['chdrc'];
                 $grd->cssClass = $params['tblc'];
+                $grd->columnHeaderClass = $params['chdrc'];
                 $grd->itemClass = $params['itmc'];
                 $grd->altItemClass = $params['aitmc'];
+                $grd->pagerClass = $params['pclass'];
 
                 $grd->columnHeaderStyle = $params['chdrs'];
                 $grd->cssStyle = $params['tbls'];
                 $grd->itemStyle = $params['itms'];
                 $grd->altItemStyle = $params['aitms'];
+                $grd->pagerStyle = $params['pstyle'];
 
                 $grd->columns = $params['cols'];
                 $grd->fields = $params['flds'];
@@ -497,10 +499,10 @@ if (!function_exists('getTVDisplayFormat')) {
                 $grd->cellSpacing = $params['cspace'];
                 $grd->header = $params['head'];
                 $grd->footer = $params['foot'];
+                
                 $grd->pageSize = $params['psize'];
                 $grd->pagerLocation = $params['ploc'];
-                $grd->pagerClass = $params['pclass'];
-                $grd->pagerStyle = $params['pstyle'];
+
                 $o = $grd->render();
                 break;
 

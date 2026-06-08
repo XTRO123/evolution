@@ -27,7 +27,12 @@
         $cm = new \EvolutionCMS\Support\ContextMenu('cntxm', 150);
         $cm->addItem(ManagerTheme::getLexicon('view_log'), 'js:menuAction(1)', $_style['icon_eye']);
         //$cm->addSeparator();
-        $cm->addItem(ManagerTheme::getLexicon('delete'), 'js:menuAction(2)', $_style['icon_trash'], !$modx->hasPermission('delete_eventlog') ? 1 : 0);
+        $cm->addItem(
+            ManagerTheme::getLexicon('delete'),
+            'js:menuAction(2)',
+            $_style['icon_trash'],
+            !$modx->hasPermission('delete_eventlog') ? 1 : 0,
+        );
         $contextmenu = $cm->render();
     @endphp
     @push('scripts.top')
@@ -157,29 +162,37 @@
                                 });
                             }
                         }
+
                         $grd = new \EvolutionCMS\Support\DataGrid('', $eventLog, 100); // set page size to 0 t show all items
-                        $grd->pagerClass = '';
-                        $grd->pagerStyle = 'white-space: normal;';
-                        $grd->pageClass = 'page-item';
-                        $grd->selPageClass = 'page-item active';
-                        $grd->prepareResult = ['icon' => [1 => 'text-info ' . $_style['icon_info_circle'], 2 => 'text-warning ' . $_style['icon_info_triangle'], 3 => 'text-danger ' . $_style['icon_cancel']]];
+
                         $grd->noRecordMsg = ManagerTheme::getLexicon('no_records_found');
+                        $grd->prepareResult = ['icon' => [1 => 'text-info ' . $_style['icon_info_circle'], 2 => 'text-warning ' . $_style['icon_info_triangle'], 3 => 'text-danger ' . $_style['icon_cancel']]];
+
                         $grd->cssClass = 'table data nowrap';
                         $grd->columnHeaderClass = 'tableHeader';
                         $grd->itemClass = 'tableItem';
                         $grd->altItemClass = 'tableAltItem';
-                        $grd->fields = 'type,source,createdon,eventid,username';
+                        $grd->pageClass = 'page-item';
+                        $grd->selPageClass = 'page-item active';
+
+                        $grd->pagerStyle = 'white-space: normal;';
+
                         $grd->columns = ManagerTheme::getLexicon('type') . ' ,' . ManagerTheme::getLexicon('source') . ' ,' . ManagerTheme::getLexicon('date') . ' ,' . ManagerTheme::getLexicon('event_id') . ' ,' . ManagerTheme::getLexicon('sysinfo_userid');
+                        $grd->fields = 'type,source,createdon,eventid,username';
                         $grd->colWidths = '1%,,1%,1%,1%';
                         $grd->colAligns = 'center,,,center,center';
                         $grd->colTypes = "template:<a class='gridRowIcon' href='javascript:;' onclick='return showContentMenu([+id+],event);' title='" . ManagerTheme::getLexicon('click_to_context') . "'><i class='[+icon+]'></i></a>||template:<a href='index.php?a=115&id=[+id+]' title='" . ManagerTheme::getLexicon('click_to_view_details') . "'>[+source+]</a>||date: " . $modx->toDateFormat(null, 'formatOnly') . ' H:i:s';
+
+                        // $grd->pageSize = 0;
+                        $grd->pagerLocation = 'both-left';
+
                         if ($listmode == '1') {
                             $grd->pageSize = 0;
                         }
                         if (get_by_key($_REQUEST, 'op') === 'reset') {
                             $grd->pageNumber = 1;
                         }
-                        // render grid
+
                         echo $grd->render();
                         ?>
                     </div>

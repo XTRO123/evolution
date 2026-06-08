@@ -190,19 +190,30 @@ include_once MODX_MANAGER_PATH . "includes/header.inc.php";
             <div class="row">
                 <div class="table-responsive">
                     <?php
-                    $grd = new \EvolutionCMS\Support\DataGrid('', $ds, 0); // set page size to 0 t show all items
+                    // set page size to 0 to show all items
+                    $grd = new \EvolutionCMS\Support\DataGrid('', $ds, 0); 
+
                     $grd->noRecordMsg = $_lang["no_records_found"];
+
                     $grd->cssClass = "table data nowrap";
                     $grd->columnHeaderClass = "tableHeader";
                     $grd->itemClass = "tableItem";
                     $grd->altItemClass = "tableAltItem";
+
+                    $grd->pagerStyle = 'white-space: normal;';
+
                     $grd->columns = $_lang["name"] . " ," . $_lang["description"];
+                    $grd->fields = $rt == 'tpl' ? 'templatename,description' : 'name,description';
                     $grd->colTypes = "template:<input type='" . ($sm == 'm' ? 'checkbox' : 'radio') . "' name='id[]' value='[+id+]' onclick='setCheckbox(this);'> [+e.value+]||template:[+e.value+]";
                     $grd->colWidths = "45%";
-                    $grd->fields = $rt == 'tpl' ? 'templatename,description' : 'name,description';
+
+                    // $grd->pageSize = 0;
+                    $grd->pagerLocation = 'both-left';
+
                     if ($_REQUEST['listmode'] == '1') {
                         $grd->pageSize = 0;
                     }
+
                     echo $grd->render();
                     ?>
                 </div>

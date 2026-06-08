@@ -230,16 +230,27 @@ if ($content['locked'] == 1 && $_SESSION['mgrRole'] != 1) {
                             ->where('site_module_depobj.module', $id)
                             ->orderBy('site_module_depobj.type')
                             ->orderBy('name');
-                        $grd = new \EvolutionCMS\Support\DataGrid('', $depobj, 0); // set page size to 0 t show all items
+
+                        // set page size to 0 to show all items
+                        $grd = new \EvolutionCMS\Support\DataGrid('', $depobj, 0); 
+
                         $grd->noRecordMsg = $_lang["no_records_found"];
                         $grd->prepareResult = ['type' => [10 => 'Chunk', 20 => 'Document', 30 => 'Plugin', 40 => 'Snippet', 50 => 'Template', 60 => 'TV']];
+
                         $grd->cssClass = "grid";
                         $grd->columnHeaderClass = "gridHeader";
                         $grd->itemClass = "gridItem";
                         $grd->altItemClass = "gridAltItem";
+
+                        $grd->pagerStyle = 'white-space: normal;';
+
                         $grd->columns = $_lang["element_name"] . " ," . $_lang["type"];
-                        $grd->colTypes = "template:<input type='checkbox' name='depid[]' value='[+id+]'> [+value+]";
                         $grd->fields = "name,type";
+                        $grd->colTypes = "template:<input type='checkbox' name='depid[]' value='[+id+]'> [+value+]";
+
+                        // $grd->pageSize = 0;
+                        $grd->pagerLocation = 'both-left';
+
                         echo $grd->render();
                         ?>
                     </td>

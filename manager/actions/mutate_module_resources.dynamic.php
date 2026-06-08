@@ -168,6 +168,7 @@ if ($content['locked'] == 1 && $_SESSION['mgrRole'] != 1) {
     };
 
     var actions = {
+        // a=76, elements
         close: function () {
             document.location.href = 'index.php?a=76&tab=5';
         }

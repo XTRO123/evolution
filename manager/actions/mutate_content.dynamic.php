@@ -149,7 +149,6 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
     <style>
         .image_for_field[data-image] { display: block; content: ""; width: 120px; height: 120px; margin: .1rem .1rem 0 0; border: 1px #ccc solid; background: #fff 50% 50% no-repeat; background-size: contain; cursor: pointer }
         .image_for_field[data-image=""] { display: none }
-
     </style>
     <script type="text/javascript">
       /* <![CDATA[ */
@@ -167,31 +166,38 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
       }
 
       var actions = {
-          new: function() {
-              document.location.href = "index.php?pid=<?= isset($_REQUEST['id']) ? $_REQUEST['id'] : '' ?>&a=4";
-          },
-          newlink: function() {
-              document.location.href = "index.php?pid=<?= isset($_REQUEST['id']) ? $_REQUEST['id'] : '' ?>&a=72";
-          },
+        // a=4, add processor 
+        new: function() {
+          document.location.href = "index.php?pid=<?= isset($_REQUEST['id']) ? $_REQUEST['id'] : '' ?>&a=4";
+        },
+        // a=72, weblink
+        newlink: function() {
+          document.location.href = "index.php?pid=<?= isset($_REQUEST['id']) ? $_REQUEST['id'] : '' ?>&a=72";
+        },
+        //
         save: function() {
           documentDirty = false;
           form_save = true;
           document.mutate.save.click();
         },
+        // a=6, delete processor
         delete: function() {
           if(confirm("<?= $_lang['confirm_delete_resource']?>") === true) {
             document.location.href = "index.php?id=" + document.mutate.id.value + "&a=6<?= $add_path ?>";
           }
         },
+        // a=3, resource view
         cancel: function() {
           documentDirty = false;
           document.location.href = 'index.php?<?=($id == 0 ? 'a=2' : 'a=3&r=1&id=' . $id . $add_path) ?>';
         },
+        // a=94, duplicate processor
         duplicate: function() {
           if(confirm("<?= $_lang['confirm_resource_duplicate']?>") === true) {
             document.location.href = "index.php?id=<?= (int)get_by_key($_REQUEST, 'id', 0, 'is_scalar') ?>&a=94<?= $add_path ?>";
           }
         },
+        // preview in new window
         view: function() {
           window.open('<?= $modx->getConfig('friendly_urls') ? UrlProcessor::makeUrl($id) : MODX_SITE_URL . 'index.php?id=' . $id ?>', 'previeWin');
         }

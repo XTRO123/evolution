@@ -1,4 +1,5 @@
-<?php namespace EvolutionCMS\Controllers\Users;
+<?php
+namespace EvolutionCMS\Controllers\Users;
 
 use EvolutionCMS\Controllers\AbstractController;
 use EvolutionCMS\Exceptions\ServiceValidationException;
@@ -23,7 +24,7 @@ class EditOrNewUser extends AbstractController implements PageControllerInterfac
     {
         $userData = $_POST;
         $id = false;
-        if(!empty($userData['newrole'])) {
+        if (!empty($userData['newrole'])) {
             return true;
         }
         if (isset($userData['id'])) {
@@ -49,14 +50,25 @@ class EditOrNewUser extends AbstractController implements PageControllerInterfac
             if ($userData['mode'] == 87) {
                 $userData['verified'] = 1;
                 $user = UserManager::create($userData);
+
+                if (isset($userData['role'])
+                    && EvolutionCMS()->hasPermission('save_role')) {
+                    UserManager::setRole(['id' => $user->getKey(), 'role' => $userData['role']]);
+                }
             } else {
-                $userData['verified'] = (int)($userData['verified'] ?? 0);
+                $userData['verified'] = (int) ($userData['verified'] ?? 0);
                 $user = UserManager::edit($userData);
                 if (isset($userData['password'])) {
                     $userData['clearPassword'] = $userData['password'];
                     $user->password = EvolutionCMS()->getPasswordHash()->HashPassword($userData['password']);
                     $user->cachepwd = '';
                     $user->save();
+                }
+
+                if (isset($userData['role'])
+                    && $userData['role'] != $user->attributes->role
+                    && EvolutionCMS()->hasPermission('save_role')) {
+                    UserManager::setRole(['id' => $user->getKey(), 'role' => $userData['role']]);
                 }
             }
         } catch (ServiceValidationException $exception) {
@@ -74,7 +86,7 @@ class EditOrNewUser extends AbstractController implements PageControllerInterfac
         $tvs = SiteTmplvar::query()->distinct()
             ->select('site_tmplvars.*', 'user_values.value')
             ->join('user_role_vars', 'user_role_vars.tmplvarid', '=', 'site_tmplvars.id')
-            ->leftJoin('user_values', function($query) use ($user) {
+            ->leftJoin('user_values', function ($query) use ($user) {
 
                 $query->on('user_values.userid', '=', \DB::raw($user->id));
                 $query->on('user_values.tmplvarid', '=', 'site_tmplvars.id');
@@ -91,24 +103,20 @@ class EditOrNewUser extends AbstractController implements PageControllerInterfac
                 $value = $userData["tv" . $row['id']];
 
                 switch ($row['type']) {
-
-                    case 'url': {
+                    case 'url':
                         if ($userData["tv" . $row['id'] . '_prefix'] != '--') {
                             $value = str_replace([
                                 "feed://",
                                 "ftp://",
                                 "http://",
                                 "https://",
-                                "mailto:"
+                                "mailto:",
                             ], "", $value);
                             $value = $userData["tv" . $row['id'] . '_prefix'] . $value;
                         }
                         break;
-                    }
 
                     default:
-                    {
-
                         if (is_array($value)) {
                             // handles checkboxes & multiple selects elements
                             $feature_insert = [];
@@ -117,9 +125,7 @@ class EditOrNewUser extends AbstractController implements PageControllerInterfac
                             }
                             $value = implode("||", $feature_insert);
                         }
-
                         break;
-                    }
                 }
             }
 
@@ -127,7 +133,6 @@ class EditOrNewUser extends AbstractController implements PageControllerInterfac
         }
 
         $userData = array_filter($userData, function ($key) {
-
             return !preg_match('/^tv\d/', $key);
         }, ARRAY_FILTER_USE_KEY);
 
@@ -138,12 +143,6 @@ class EditOrNewUser extends AbstractController implements PageControllerInterfac
         // Save User Settings
         UserManager::clearSettings($userData);
         UserManager::saveSettings($userData);
-
-        if (isset($userData['role'])
-            && $userData['role'] != $user->attributes->role
-            && EvolutionCMS()->hasPermission('save_role')) {
-            UserManager::setRole(['id' => $user->getKey(), 'role' => $userData['role']]);
-        }
 
         if (isset($userData['user_groups']) && is_array($userData['user_groups'])) {
             UserManager::setGroups(['id' => $user->getKey(), 'groups' => $userData['user_groups']]);

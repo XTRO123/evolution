@@ -21,7 +21,7 @@
                     w.history.replaceState(null, d.title, modx.MODX_MANAGER_URL);
                 } else if (modx.getActionFromUrl(href) || modx.main.getQueryVariable('filemanager', href) || /^modules\//.test(href)) {
                     var filemanager = modx.main.getQueryVariable('filemanager', href);
-                    var url = filemanager 
+                    var url = filemanager
                         ? modx.MODX_MANAGER_URL + filemanager + (href.indexOf('?') !== -1 ? '?' + href.split('?')[1] : '')
                         : href;
                     if (modx.config.global_tabs) {
@@ -1247,17 +1247,21 @@
             },
             menuHandler: function (a) {
                 switch (a) {
+                    // a=3, resource view
                     case 1:
                         this.setActiveFromContextMenu(this.itemToChange);
                         modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=3&id=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         break;
+                    // a=27, resource edit
                     case 2:
                         this.setActiveFromContextMenu(this.itemToChange);
                         modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=27&r=1&id=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         break;
+                    // a=4, add processor
                     case 3:
                         modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=4&pid=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         break;
+                    // a=6, delete processor
                     case 4:
                         if (this.selectedObjectDeleted) {
                             alert('"' + this.selectedObjectName + '" ' + modx.lang.already_deleted);
@@ -1265,18 +1269,22 @@
                             modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=6&id=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         }
                         break;
+                    // a=51, move
                     case 5:
                         this.setActiveFromContextMenu(this.itemToChange);
                         modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=51&id=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         break;
+                    // a=72, add weblink
                     case 6:
                         modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=72&pid=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         break;
+                    // a=94, duplicate processor
                     case 7:
                         if (confirm(modx.lang.confirm_resource_duplicate) === true) {
                             modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=94&id=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         }
                         break;
+                    // a=63, undelete processor
                     case 8:
                         if (d.getElementById('node' + this.itemToChange).firstChild.dataset.deleted) {
                             if (confirm('"' + this.selectedObjectName + '" ' + modx.lang.confirm_undelete) === true) {
@@ -1286,11 +1294,13 @@
                             alert('"' + this.selectedObjectName + '"' + modx.lang.not_deleted);
                         }
                         break;
+                    // a=61, publishing processor
                     case 9:
                         if (confirm('"' + this.selectedObjectName + '" ' + modx.lang.confirm_publish) === true) {
                             modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=61&id=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         }
                         break;
+                    // a=62, unpublishing processor
                     case 10:
                         if (this.itemToChange !== modx.config.site_start) {
                             if (confirm('"' + this.selectedObjectName + '" ' + modx.lang.confirm_unpublish) === true) {
@@ -1300,12 +1310,15 @@
                             modx.alert('Document is linked to site_start variable and cannot be unpublished!');
                         }
                         break;
+                    // a=56, sort menuindex
                     case 11:
                         modx.tabs({ url: modx.MODX_MANAGER_URL + '?a=56&id=' + this.itemToChange, title: this.selectedObjectName + '<small class="text-muted">(' + this.itemToChange + ')</small>' });
                         break;
+                    // preview in new window
                     case 12:
                         w.open(d.getElementById('node' + this.itemToChange).firstChild.dataset.href, 'previeWin');
                         break;
+                    // no action
                     default:
                         modx.alert('Unknown operation command.');
                 }
@@ -1507,8 +1520,13 @@
                 this.title = a.title || '';
                 this.name = a.name || '';
                 this.timer = null;
-                this.olduid = '';
-                this.closeactions = [6, 61, 62, 63, 94];
+                this.uid = null;
+                this.action = null;
+                this.oldUid = '';
+                this.oldAction = this.action;
+                // 6=delete, 61=publishing, 62=unpublishing, 63=undelete, 94=duplicate
+                this.closeActions = [6, 61, 62, 63, 94];
+                // 86=roles, 99=user management, 106=modules
                 this.saveAndCloseActions = [86, 99, 106];
                 this.reload = typeof a.reload !== 'undefined' ? a.reload : 1;
                 this.action = modx.getActionFromUrl(a.url);
@@ -1535,8 +1553,11 @@
                             modx.tabs.selected = this.tab;
                         }
                     } else {
+                        if (this.action !== this.oldAction) {
+                            this.page.firstElementChild.src = this.url;
+                        }
                         this.show();
-                        if (~this.closeactions.indexOf(this.action)) {
+                        if (~this.closeActions.indexOf(this.action)) {
                             this.setDocPublished();
                             modx.get(this.url, function (r) {
                                 /__alertQuit\(\)/.test(r) && modx.alert(r.match(/\<body\>(.*?)\<\/body\>/s)[0]);
@@ -1544,7 +1565,7 @@
                             });
                         }
                     }
-                } else if (~this.closeactions.indexOf(this.action)) {
+                } else if (~this.closeActions.indexOf(this.action)) {
                     modx.get(this.url, function (r) {
                         /__alertQuit\(\)/.test(r) && modx.alert(r.match(/\<body\>(.*?)\<\/body\>/s)[0]);
                         modx.tree.restoreTree();
@@ -1572,10 +1593,8 @@
                         this.page.innerHTML = '<iframe class="tabframes" src="' + this.url + '" name="' + this.name + '" width="100%" height="100%" scrolling="auto" frameborder="0"></iframe>';
                     }
                     d.getElementById('main').appendChild(this.page);
-                    //console.time('load-tab');
                     this.page.firstElementChild.onload = function (e) {
                         s.onload.call(s, e);
-                        //console.timeEnd('load-tab');
                     };
                     this.tab = d.createElement('h2');
                     this.tab.id = 'evo-tab-' + this.uid;
@@ -1604,7 +1623,8 @@
                     var s = this;
                     w.main = e.target.contentWindow || e.target.defaultView;
                     this.url = modx.normalizeUrl(w.main.location.href) || modx.normalizeUrl(w.location.href);
-                    this.olduid = this.uid;
+                    this.oldUid = this.uid;
+                    this.oldAction = this.action;
                     this.uid = modx.urlToUid(this.url);
                     if (!!w.main.__alertQuit) {
                         w.main.alert = function (a) { };
@@ -1616,7 +1636,7 @@
                         };
                         modx.alert(message);
                         modx.getLockedElements(modx.getActionFromUrl(this.url), modx.main.getQueryVariable('id', this.url), function (data) {
-                            if (!!data || ~s.closeactions.indexOf(modx.getActionFromUrl(s.url))) {
+                            if (!!data || ~s.closeActions.indexOf(modx.getActionFromUrl(s.url))) {
                                 s.page.close();
                                 modx.tree.restoreTree();
                             } else {
@@ -1627,7 +1647,7 @@
                     } else {
                         if (modx.getActionFromUrl(this.url, 2) || (~this.saveAndCloseActions.indexOf(modx.getActionFromUrl(this.url)) && parseInt(modx.main.getQueryVariable('r', this.url)))) {
                             this.close(e);
-                        } else if (this.olduid !== this.uid && d.getElementById('evo-tab-' + this.uid)) {
+                        } else if (this.oldUid !== this.uid && d.getElementById('evo-tab-' + this.uid)) {
                             this.close(e);
                             d.getElementById('evo-tab-' + this.uid).show();
                             if (parseInt(modx.main.getQueryVariable('r', this.url)) === 2) {
@@ -1670,6 +1690,7 @@
                     modx.title(this.txt);
                     modx.tabs.selected = this.tab;
                     w.main = this.page.firstElementChild.contentWindow;
+                    //  a=76 elements, a=91 user roles
                     if (this.getTab && (this.action === 76 || this.action === 91) && !~w.main.frameElement.contentDocument.location.href.indexOf(this.url)) {
                         w.main.frameElement.src = this.url;
                     } else {
@@ -2216,7 +2237,7 @@
 
                 let m = a.match(/modules\/(.*?)$/)?.[1];
                 m && (b += m);
-                
+
                 b = modx.toHash(b);
             }
             return b;
@@ -2536,7 +2557,6 @@
         }
     };
     w.mainMenu.startrefresh = function (a) {
-        //console.log('mainMenu.startrefresh(' + a + ')');////
         if (a === 1) {
             //setTimeout('modx.tree.restoreTree()', 50)
         }
@@ -2561,15 +2581,13 @@
     w.tree.document = document;
     w.tree.saveFolderState = function () { };
     w.tree.updateTree = function () {
-        //console.log('tree.updateTree()');
         modx.tree.updateTree();
     };
     w.tree.restoreTree = function () {
-        //console.log('tree.restoreTree()');
         modx.tree.restoreTree();
     };
     w.tree.resizeTree = function () {
-        //console.log('tree.resizeTree() off')
+        //
     };
     w.onbeforeunload = function () {
         var a = w.main.frameElement.contentWindow,

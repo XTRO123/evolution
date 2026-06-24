@@ -55,6 +55,6 @@ class BladeDirective
 
     public static function phpthumb(string $params): string
     {
-        return '<?php echo EvolutionCMS\Facades\HelperProcessor::phpthumb(' . $params . ');?>';
+        return '<?php echo urldecode(EvolutionCMS\Facades\HelperProcessor::phpthumb(' . $params . '));?>';
     }
 }

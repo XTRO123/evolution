@@ -190,9 +190,9 @@ switch ($action) {
             $addnew = 1;
         }
         break;
-    case '106':
-    case '107':
-    case '108':
+    case '106': // modules
+    case '107': // module create
+    case '108': // module edit
         if ($modx->hasPermission('new_module')) {
             $addnew = 1;
         }

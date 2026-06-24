@@ -85,22 +85,26 @@ require_once(MODX_MANAGER_PATH . 'includes/active_user_locks.inc.php');
             document.mutate.save.click();
             saveWait('mutate');
         },
+        // a=111, duplicate module
         duplicate: function () {
             if (confirm("<?= $_lang['confirm_duplicate_record'] ?>") === true) {
                 documentDirty = false;
                 document.location.href = "index.php?id=<?= (isset($_REQUEST['id'])) ? $_REQUEST['id'] : "" ?>&a=111";
             }
         },
+        // a=110, delete module
         delete: function () {
             if (confirm("<?= $_lang['confirm_delete_module'] ?>") === true) {
                 documentDirty = false;
                 document.location.href = "index.php?id=" + document.mutate.id.value + "&a=110";
             }
         },
+        // a=76, elements
         cancel: function () {
             documentDirty = false;
             document.location.href = 'index.php?a=76&tab=5';
         },
+        // a=112, execute module
         run: function () {
             document.location.href = "index.php?id=<?= (isset($_REQUEST['id'])) ? $_REQUEST['id'] : "" ?>&a=112";
         }

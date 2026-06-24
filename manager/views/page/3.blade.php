@@ -49,14 +49,14 @@
     $add_path = $sd . $sb . $pg;
 
     $actions = [
-        'new'       => 'index.php?pid=' . $_REQUEST['id'] . '&a=4',
-        'newlink'   => 'index.php?pid=' . $_REQUEST['id'] . '&a=72',
-        'edit'      => 'index.php?id=' . $_REQUEST['id'] . '&a=27',
+        'new'       => 'index.php?pid=' . $_REQUEST['id'] . '&a=4', // a=4, add processor
+        'newlink'   => 'index.php?pid=' . $_REQUEST['id'] . '&a=72', // a=72, add weblink
+        'edit'      => 'index.php?id=' . $_REQUEST['id'] . '&a=27', // a=27, resource edit
         'save'      => '',
-        'delete'    => 'index.php?id=' . $_REQUEST['id'] . '&a=6',
-        'cancel'    => 'index.php?' . ($id == 0 ? 'a=2' : 'a=3&r=1&id=' . $id . $add_path),
-        'move'      => 'index.php?id=' . $_REQUEST['id'] . '&a=51',
-        'duplicate' => 'index.php?id=' . $_REQUEST['id'] . '&a=94',
+        'delete'    => 'index.php?id=' . $_REQUEST['id'] . '&a=6', // a=6, delete processor
+        'cancel'    => 'index.php?' . ($id == 0 ? 'a=2' : 'a=3&r=1&id=' . $id . $add_path), // a=3, resource view
+        'move'      => 'index.php?id=' . $_REQUEST['id'] . '&a=51', // a=51, move
+        'duplicate' => 'index.php?id=' . $_REQUEST['id'] . '&a=94', // a=94, duplicate processor
         'view'      => $modx->getConfig('friendly_urls') ? UrlProcessor::makeUrl($id) : MODX_SITE_URL . 'index.php?id=' . $id,
     ];
 

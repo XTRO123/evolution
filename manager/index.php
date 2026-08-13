@@ -110,11 +110,11 @@ header('Pragma: no-cache');
 header('X-UA-Compatible: IE=edge;FF=3;OtherUA=4');
 header('X-XSS-Protection: 0');
 
-// check PHP version. EVO is compatible with php 5 (5.6.0+)
-$php_ver_comp = version_compare(phpversion(), "7.1.3");
+// check PHP version
+$php_ver_comp = version_compare(phpversion(), "8.0.1");
 // -1 if left is less, 0 if equal, +1 if left is higher
 if ($php_ver_comp < 0) {
-    echo 'Evolution CMS is compatible with PHP version 7.1.3 and higher. This server is using version ' . phpversion() . '. Please upgrade your PHP installation!';
+    echo 'Evolution CMS is compatible with PHP version 8.0.1 and higher. This server is using version ' . phpversion() . '. Please upgrade your PHP installation!';
     exit;
 }
 

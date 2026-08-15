@@ -71,6 +71,16 @@ if (!function_exists('evo')) {
     }
 }
 
+if (!function_exists('db')) {
+    /**
+     * @return DocumentParser
+     */
+    function db()
+    {
+        return evolutionCMS()->getDatabase();
+    }
+}
+
 if (!function_exists('genEvoSessionName')) {
     /**
      * @return string

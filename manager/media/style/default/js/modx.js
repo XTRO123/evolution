@@ -1855,6 +1855,12 @@
                             modx.dragging(o.el, { wrap: o.wrap, resize: o.resize });
                         }
                         o.el.classList.add('show');
+                        if (typeof o.onshow === 'function') {
+                            var evt = document.createEvent('HTMLEvents');
+							evt.initEvent('show', false, true);
+							o.el.dispatchEvent(evt);
+							o.onshow(evt, o.el);
+                        }
                     },
                     close: function (e) {
                         o.event = e || o.event || w.event;
@@ -1932,7 +1938,8 @@
                             }
                         }
                     },
-                    onclose: function (e, obj) { }
+                    onclose: function (e, obj) { },
+                    onshow: function (e, obj) { }
                 };
                 for (var k in a) {
                     if (a.hasOwnProperty(k) && typeof o[k] !== 'undefined') {

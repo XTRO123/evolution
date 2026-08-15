@@ -163,6 +163,10 @@ browser.changeDir = function(dir) {
                 document.title = title;
                 if (browser.opener.TinyMCE)
                     tinyMCEPopup.editor.windowManager.setTitle(window, title);
+                window.parent.postMessage(JSON.stringify({
+                    type: "kcfinder:change-title",
+                    title: title
+				            }), "*");
                 browser.statusDir();
             },
             error: function() {

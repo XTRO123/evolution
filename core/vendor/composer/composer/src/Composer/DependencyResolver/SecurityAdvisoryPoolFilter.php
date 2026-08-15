@@ -12,12 +12,13 @@
 
 namespace Composer\DependencyResolver;
 
-use Composer\Advisory\AuditConfig;
 use Composer\Advisory\Auditor;
 use Composer\Advisory\PartialSecurityAdvisory;
 use Composer\Advisory\SecurityAdvisory;
+use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
+use Composer\Policy\PolicyConfig;
 use Composer\Repository\PlatformRepository;
 use Composer\Repository\RepositoryInterface;
 use Composer\Repository\RepositorySet;
@@ -30,45 +31,69 @@ class SecurityAdvisoryPoolFilter
 {
     /** @var Auditor */
     private $auditor;
-    /** @var AuditConfig $auditConfig */
-    private $auditConfig;
+    /** @var PolicyConfig */
+    private $policyConfig;
+    /** @var IOInterface */
+    private $io;
 
     public function __construct(
         Auditor $auditor,
-        AuditConfig $auditConfig
+        PolicyConfig $policyConfig,
+        IOInterface $io
     ) {
         $this->auditor = $auditor;
-        $this->auditConfig = $auditConfig;
+        $this->policyConfig = $policyConfig;
+        $this->io = $io;
     }
 
     /**
      * @param array<RepositoryInterface> $repositories
      */
-    public function filter(Pool $pool, array $repositories): Pool
+    public function filter(Pool $pool, array $repositories, Request $request): Pool
     {
-        $advisoryMap = [];
-        if ($this->auditConfig->blockInsecure) {
-            $repoSet = new RepositorySet();
-            foreach ($repositories as $repo) {
-                $repoSet->addRepository($repo);
-            }
+        $advisories = $this->policyConfig->advisories;
+        $abandoned = $this->policyConfig->abandoned;
 
-            $packagesForAdvisories = [];
-            foreach ($pool->getPackages() as $package) {
-                if (!$package instanceof RootPackageInterface && !PlatformRepository::isPlatformPackage($package->getName())) {
-                    $packagesForAdvisories[] = $package;
-                }
-            }
-
-            $allAdvisories = $repoSet->getMatchingSecurityAdvisories($packagesForAdvisories, true);
-            $advisoryMap = $this->auditor->processAdvisories($allAdvisories['advisories'], $this->auditConfig->ignoreList, [])['advisories'];
+        if (!$advisories->block) {
+            return $pool;
         }
+
+        $repoSet = new RepositorySet();
+        foreach ($repositories as $repo) {
+            $repoSet->addRepository($repo);
+        }
+
+        $packagesForAdvisories = [];
+        foreach ($pool->getPackages() as $package) {
+            if (!$package instanceof RootPackageInterface && !PlatformRepository::isPlatformPackage($package->getName()) && !$request->isLockedPackage($package)) {
+                $packagesForAdvisories[] = $package;
+            }
+        }
+
+        $ignoreListForBlocking = $advisories->getIgnoreListForOperation('block');
+        $ignoreUnreachableUpdate = $this->policyConfig->ignoreUnreachable->update;
+
+        $allAdvisories = $repoSet->getMatchingSecurityAdvisories($packagesForAdvisories, true, $ignoreUnreachableUpdate);
+        if ($this->auditor->needsCompleteAdvisoryLoad($allAdvisories['advisories'], $ignoreListForBlocking)) {
+            $allAdvisories = $repoSet->getMatchingSecurityAdvisories($packagesForAdvisories, false, $ignoreUnreachableUpdate);
+        }
+
+        if ($ignoreUnreachableUpdate && count($allAdvisories['unreachableRepos']) > 0) {
+            $this->io->writeError('<warning>Security advisory data could not be fetched from some repositories (ignored per policy.ignore-unreachable); matches may be incomplete:</warning>');
+            foreach ($allAdvisories['unreachableRepos'] as $repo) {
+                $this->io->writeError('  - ' . $repo);
+            }
+        }
+
+        $advisoryMap = $this->auditor->processAdvisories($allAdvisories['advisories'], $ignoreListForBlocking, $advisories->getIgnoreSeverityForOperation('block'))['advisories'];
+
+        $ignoreAbandonedForBlocking = $abandoned->getFlatIgnoreForOperation('block');
 
         $packages = [];
         $securityRemovedVersions = [];
         $abandonedRemovedVersions = [];
         foreach ($pool->getPackages() as $package) {
-            if ($this->auditConfig->blockAbandoned && count($this->auditor->filterAbandonedPackages([$package], $this->auditConfig->ignoreAbandonedPackages)) !== 0) {
+            if ($abandoned->block && count($this->auditor->filterAbandonedPackages([$package], $ignoreAbandonedForBlocking)) !== 0) {
                 foreach ($package->getNames(false) as $packageName) {
                     $abandonedRemovedVersions[$packageName][$package->getVersion()] = $package->getPrettyVersion();
                 }

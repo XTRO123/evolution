@@ -26,6 +26,8 @@ use Composer\Plugin\PreCommandRunEvent;
 use Composer\Package\Version\VersionParser;
 use Composer\Plugin\PluginEvents;
 use Composer\Advisory\Auditor;
+use Composer\Advisory\AuditConfig;
+use Composer\Policy\PolicyConfig;
 use Composer\Util\Platform;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
@@ -258,6 +260,8 @@ abstract class BaseCommand extends Command
             'COMPOSER_MINIMAL_CHANGES' => ['minimal-changes'],
             'COMPOSER_WITH_DEPENDENCIES' => ['with-dependencies'],
             'COMPOSER_WITH_ALL_DEPENDENCIES' => ['with-all-dependencies'],
+            'COMPOSER_NO_SECURITY_BLOCKING' => ['no-security-blocking'],
+            'COMPOSER_NO_BLOCKING' => ['no-blocking'],
         ];
         foreach ($envOptions as $envName => $optionNames) {
             foreach ($optionNames as $optionName) {
@@ -464,5 +468,45 @@ abstract class BaseCommand extends Command
         }
 
         return $val;
+    }
+
+    /**
+     * Creates a PolicyConfig from the Config object, applying --no-blocking / --no-security-blocking overrides.
+     *
+     * @internal
+     */
+    protected function createPolicyConfig(Config $config, ?InputInterface $input): PolicyConfig
+    {
+        $policyConfig = PolicyConfig::fromConfig($config);
+
+        // --no-blocking / --no-security-blocking: disable ALL blocking (advisories + malware + abandoned + custom)
+        $noBlocking = Platform::getBoolEnv('COMPOSER_NO_BLOCKING', false)
+            || Platform::getBoolEnv('COMPOSER_NO_SECURITY_BLOCKING', false)
+            || ($input !== null && $input->hasOption('no-security-blocking') && $input->getOption('no-security-blocking'))
+            || ($input !== null && $input->hasOption('no-blocking') && $input->getOption('no-blocking'));
+
+        if ($noBlocking) {
+            $policyConfig = $policyConfig->withBlockingDisabled();
+        }
+
+        return $policyConfig;
+    }
+
+    /**
+     * Creates an AuditConfig from the input options.
+     *
+     * @internal
+     */
+    protected function createAuditConfig(InputInterface $input): AuditConfig
+    {
+        // Handle both --audit and --no-audit flags
+        if ($input->hasOption('audit')) {
+            $audit = (bool) $input->getOption('audit');
+        } else {
+            $audit = !($input->hasOption('no-audit') && $input->getOption('no-audit'));
+        }
+        $auditFormat = $input->hasOption('audit-format') ? $this->getAuditFormat($input) : Auditor::FORMAT_SUMMARY;
+
+        return new AuditConfig($audit, $auditFormat);
     }
 }

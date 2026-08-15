@@ -12,8 +12,6 @@
 
 namespace Composer\Advisory;
 
-use Composer\Config;
-
 /**
  * @readonly
  * @internal
@@ -21,69 +19,21 @@ use Composer\Config;
 class AuditConfig
 {
     /**
-     * @var array<string>|array<string,string> List of advisory IDs, remote IDs or CVE IDs that reported but not listed as vulnerabilities.
+     * @var bool Whether to run audit
      */
-    public $ignoreList;
+    public $audit;
 
     /**
-     * @var Auditor::ABANDONED_*
+     * @var Auditor::FORMAT_*
      */
-    public $abandoned;
+    public $auditFormat;
 
     /**
-     * @var bool Should insecure versions be blocked during a composer update/required command
+     * @param Auditor::FORMAT_* $auditFormat
      */
-    public $blockInsecure;
-
-    /**
-     * @var bool Should abandoned packages be blocked during a composer update/required command
-     */
-    public $blockAbandoned;
-
-    /**
-     * @var array<string> A list of severities for which advisories with matching severity will be ignored.
-     */
-    public $ignoreSeverity;
-
-    /**
-     * @var bool Should repositories that are unreachable or return a non-200 status code be ignored.
-     */
-    public $ignoreUnreachable;
-
-    /**
-     * @var array<string>|array<string,string> List of abandoned package names that are reported but let the audit pass.
-     */
-    public $ignoreAbandonedPackages;
-
-    /**
-     * @param array<string>|array<string,string> $ignoreList
-     * @param Auditor::ABANDONED_* $abandoned
-     * @param array<string> $ignoreSeverity
-     * @param array<string>|array<string,string> $ignoreAbandonedPackages
-     */
-    public function __construct(array $ignoreList, string $abandoned, bool $blockInsecure, bool $blockAbandoned, array $ignoreSeverity, bool $ignoreUnreachable, array $ignoreAbandonedPackages)
+    public function __construct(bool $audit = true, string $auditFormat = Auditor::FORMAT_SUMMARY)
     {
-        $this->ignoreList = $ignoreList;
-        $this->abandoned = $abandoned;
-        $this->blockInsecure = $blockInsecure;
-        $this->blockAbandoned = $blockAbandoned;
-        $this->ignoreSeverity = $ignoreSeverity;
-        $this->ignoreUnreachable = $ignoreUnreachable;
-        $this->ignoreAbandonedPackages = $ignoreAbandonedPackages;
-    }
-
-    public static function fromConfig(Config $config): self
-    {
-        $auditConfig = $config->get('audit');
-
-        return new self(
-            $auditConfig['ignore'] ?? [],
-            $auditConfig['abandoned'] ?? Auditor::ABANDONED_FAIL,
-            (bool) ($auditConfig['block-insecure'] ?? true),
-            (bool) ($auditConfig['block-abandoned'] ?? false),
-            $auditConfig['ignore-severity'] ?? [],
-            (bool) ($auditConfig['ignore-unreachable'] ?? false),
-            $auditConfig['ignore-abandoned'] ?? []
-        );
+        $this->audit = $audit;
+        $this->auditFormat = $auditFormat;
     }
 }

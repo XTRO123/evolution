@@ -12,6 +12,14 @@
     <script src="[+site_url+]assets/modules/store/js/store.js?v=1.0.1" type="text/javascript"></script>
     [+onManagerMainFrameHeaderHTMLBlock+]
     <script>const _token = '[+csrf+]';</script>
+    <style>
+    .fancybox__container .f-button {
+        padding: 0;
+    }
+    .is-compact .fancybox__content>.f-button.is-close-btn {
+        --f-button-color: #000;
+    }
+</style>
 </head>
 
 <body class="[+body_class_name+]">

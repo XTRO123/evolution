@@ -8,7 +8,8 @@ if (!defined('MODX_BASE_PATH')) {
 $internalKey = $modx->getLoginUserID();
 $sid = $modx->sid;
 $role = (int)$_SESSION['mgrRole'];
-$user = $_SESSION['mgrShortname'];
+$user = (string)($_SESSION['mgrShortname'] ?? '');
+$wdgVisibility = $wdgVisibility ?? 'AdminOnly';
 
 switch (true)
 {
@@ -32,7 +33,7 @@ switch (true)
         }
         $checkOutdated = new CheckOutdated($modx, $modx->event->activePlugin, $_lang);
         $outdated = $checkOutdated->load(
-            'https://raw.githubusercontent.com/evolution-cms/OutdatedExtrasCheck/master/outdated.json'
+            'https://raw.githubusercontent.com/evocms-community/OutdatedExtrasCheck/master/outdated.json'
         );
 
         $out = '';

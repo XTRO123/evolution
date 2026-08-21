@@ -46,7 +46,7 @@ class CheckOutdated
     public function load($source)
     {
         if (0 === strpos($source, 'http')) {
-            $data = Cache::remember('users', 24 * 60, function () use($source) {
+            $data = Cache::remember('outdated_extras', 24 * 60, function () use($source) {
                 return json_decode(file_get_contents($source), true);
             });
         } else {
